@@ -2,6 +2,7 @@ import CustomError from "../errors/custom-error-class.js";
 import userModel from "../models/user-model.js";
 import sendResponse from "../utils/functions/api-response.js";
 import bcrypt from 'bcrypt';
+import { decodeToken, exchangeJWT, signRefreshJWT, signAccessJWT, verifyAccessJWT } from "../utils/functions/jwt/jwt-auth.js";
 
 // wrapper for reusability
 function wrapper(controller) {
@@ -62,17 +63,17 @@ const loginUser = wrapper(async (req, res, next) => {
     //user after authentication is successful
     const user = req.user;
 
-    const ACCESS_TOKEN = signAccessJWT({id:user._id}); //access token
-    const REFRESH_TOKEN = signRefreshJWT({id:user._id}); //refresh token
+    const ACCESS_TOKEN = signAccessJWT({ id: user._id }); //access token
+    const REFRESH_TOKEN = signRefreshJWT({ id: user._id }); //refresh token
 
     // Access token (short lived)
-    res.cookie('AT', ACCESS_TOKEN,{
+    res.cookie('AT', ACCESS_TOKEN, {
         httpOnly: true,
         maxAge: 30 * 24 * 60 * 60 * 1000 //30days
     })
 
     // Refresh token (expires in months)
-    res.cookie('RT', REFRESH_TOKEN,{
+    res.cookie('RT', REFRESH_TOKEN, {
         httpOnly: true, //prevent cookie from client-side access via JS
         maxAge: 30 * 24 * 60 * 60 * 1000 //30days
     })
@@ -81,6 +82,42 @@ const loginUser = wrapper(async (req, res, next) => {
         message: 'You have logged in to your account',
         statusCode: 200
     })
+})
+
+// protect routes
+const protect = wrapper((req, res, next) => {
+    // extract token
+    const bearerToken = req.headers.authorization;
+
+    // if does not start with 'Bearer'
+    if (!(bearerToken && bearerToken.startsWith('Bearer '))) {
+        return next(new CustomError({
+            name: 'UnauthorizedError',
+            message: 'Bearer token is missing'
+        }, 401))
+    }
+
+    // extract jwt token
+    const token = bearerToken.split(' ')[1]
+
+    //returns the decoded token or throws errors except TokenExpiredError
+    const decoded = verifyAccessJWT(token);
+    let user;
+
+    // is token expired?
+    if (decoded.name == 'TokenExpiredError') {
+        const refreshToken = req.cookies.RT
+        // will throw err if Refresh token is also expired or invalid
+        const newToken = exchangeJWT(token, refreshToken) //returns new Access token
+        res.cookie('AT', newToken) //store in cookies
+
+        // new decoded token   
+        user = decodeToken(newToken)
+    }
+
+    // user is authorized
+    req.user = decoded || user
+    next()
 })
 
 
@@ -109,5 +146,6 @@ const createUser = wrapper(async (req, res, next) => {
 export default {
     createUser,
     loginUser,
-    authenticateUser
+    authenticateUser,
+    protect
 }
