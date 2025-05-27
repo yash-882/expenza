@@ -21,16 +21,31 @@ export const verifyAccessJWT = (accessToken) => {
     }
 }
 
-// decoded token
-export const decodeToken = (token) => jwt.decode(token);
-    
+// verify Refresh Token
+export const verifyRefreshJWT = (refreshToken) => {
+    // DECODE TOKENS
+    const decoded = jwt.verify(refreshToken, process.env.JWT_SECKEY_RT);
+    return decoded;
+}
+
+// Sign Refresh Tokens
+export const signRefreshJWT = (payload) => {
+    const refreshToken = jwt.sign({
+        ...payload,
+        type: 'RefreshToken', //identifier for refresh tokens
+    }, process.env.JWT_SECKEY_RT, {
+        expiresIn: '30d' //expires in 30 days
+    })
+
+    return refreshToken;
+}
 
 // Sign Access Tokens
 export const signAccessJWT = (payload) => {
     const accessToken = jwt.sign({
         ...payload, type: 'AccessToken', //identifier for access tokens
     }, process.env.JWT_SECKEY_AT, {
-        expiresIn: '1h' //expires in 1 hour
+        expiresIn: '20m' //expires in 20 minutes
     })
 
     return accessToken;
