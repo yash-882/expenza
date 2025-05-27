@@ -2,6 +2,7 @@ import CustomError from "../errors/custom-error-class.js";
 import userModel from "../models/user-model.js";
 import sendResponse from "../utils/functions/api-response.js";
 import bcrypt from 'bcrypt';
+import { decodeToken, exchangeJWT, signRefreshJWT, signAccessJWT, verifyAccessJWT, verifyRefreshJWT} from "../utils/functions/jwt/jwt-auth.js";
 
 // wrapper for reusability
 function wrapper(controller) {
@@ -62,8 +63,8 @@ const loginUser = wrapper(async (req, res, next) => {
     //user after authentication is successful
     const user = req.user;
 
-    const ACCESS_TOKEN = signAccessJWT({id:user._id}); //access token
-    const REFRESH_TOKEN = signRefreshJWT({id:user._id}); //refresh token
+    const ACCESS_TOKEN = signAccessJWT({ id: user._id }); //access token
+    const REFRESH_TOKEN = signRefreshJWT({ id: user._id }); //refresh token
 
     // Access token (short lived)
     res.cookie('AT', ACCESS_TOKEN,{
@@ -81,6 +82,70 @@ const loginUser = wrapper(async (req, res, next) => {
         message: 'You have logged in to your account',
         statusCode: 200
     })
+})
+
+// protect routes
+const protect = wrapper(async (req, res, next) => {
+    // extract token
+    const accessToken = req.cookies.AT;
+
+    //returns the decoded token or throws errors except TokenExpiredError
+    let token = accessToken ? verifyAccessJWT(accessToken) : undefined;
+
+    // is token expired / missing?
+    if (!token || token.name == 'TokenExpiredError') {
+        const refreshToken = req.cookies.RT
+
+        if(!refreshToken){
+            res.clearCookie('AT', {httpOnly: true})
+              return next(new CustomError({
+            name: 'UnauthorizedError',
+            message: 'You are not authorized to this page. Please login'
+        }, 401))
+        }
+
+        let newAccessToken;
+
+        // access token is not provided
+        if(!token){
+            // will throw err if Refresh token is also expired or invalid
+        let payload = verifyRefreshJWT(refreshToken) //returns payload
+
+        // signing access token...
+        newAccessToken = signAccessJWT({id: payload.id})
+
+        }
+        // access token is provided
+         else
+            newAccessToken = exchangeJWT(token, refreshToken)
+        
+        //store new access token in cookies
+        res.cookie('AT', newAccessToken, {
+            httpOnly: true, 
+            maxAge: 15 * 60 * 1000 //15 minutes
+        }) 
+
+        // new user's token   
+        token = decodeToken(newAccessToken)
+    }
+
+    // recheck for user
+    let userInDB = await userModel.findById(token.id)
+
+    if(!userInDB){
+        // clear tokens
+        res.clearCookie('AT', {httpOnly: true})
+        res.clearCookie('RT', {httpOnly: true})
+        return next(new CustomError({
+            name: 'NotFoundError',
+            message: 'The profile is not found.'
+
+        }, 404))
+    }
+
+    // user is authorized
+    req.user = userInDB
+    next()
 })
 
 
@@ -109,5 +174,6 @@ const createUser = wrapper(async (req, res, next) => {
 export default {
     createUser,
     loginUser,
-    authenticateUser
+    authenticateUser,
+    protect
 }
