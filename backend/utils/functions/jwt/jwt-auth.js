@@ -74,3 +74,5 @@ export const signAccessJWT = (payload) => {
 
     return accessToken;
 }
+// decode tokens
+export const decodeToken = (token) => jwt.decode(token)
