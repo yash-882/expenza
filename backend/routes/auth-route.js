@@ -6,7 +6,7 @@ const authRouter = Router();
 authRouter.route('/sign-up')
 .post(authController.createUser)
 
-// login user after authentication is succesful
+// login user after authentication is successful
 authRouter.route('/login')
 .post(authController.authenticateUser, authController.loginUser)
 
