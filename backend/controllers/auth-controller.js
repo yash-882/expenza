@@ -59,6 +59,23 @@ const authenticateUser = wrapper(async (req, res, next) => {
 
 // response of successful login after authentication
 const loginUser = wrapper(async (req, res, next) => {
+    //user after authentication is successful
+    const user = req.user;
+
+    const ACCESS_TOKEN = signAccessJWT({id:user._id}); //access token
+    const REFRESH_TOKEN = signRefreshJWT({id:user._id}); //refresh token
+
+    // Access token (short lived)
+    res.cookie('AT', ACCESS_TOKEN,{
+        httpOnly: true, //prevent cookie from client-side access via JS
+        maxAge: 15 * 60 * 1000 //15 mins
+    })
+
+    // Refresh token (expires in 20 days)
+    res.cookie('RT', REFRESH_TOKEN,{
+        httpOnly: true, //prevent cookie from client-side access via JS
+        maxAge: 20 * 24 * 60 * 60 * 1000 //20days
+    })
 
     return sendResponse(res, {
         message: 'You have logged in to your account',
