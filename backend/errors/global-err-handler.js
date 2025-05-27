@@ -1,12 +1,8 @@
-// errors created using the CustomError class manually that will always contain
-// isOperational property for errs like , 404(not found), 401(unauthorized)
-// but if the error is thrown by libraries like mongoDB, jwt,etc, 
-// they throw the error directly to the Global ERROR handler and
-// do not contain the isOperational property even though they are considered as 
-// operational errors
-// for those errors, we manually define HTTP status codes
+// errors by frameworks like mongoose, jwt etc don't include isOperational property
+// even if they are considered as operational
+// OPERATIONAL_ERRORS helps identifying those errors 
 
-const StatusCodes = new Map([
+const OPERATIONAL_ERRORS= new Map([
     ['CastError', 400], //Invalid id format
     ['ValidationError', 400], // Mongoose validation error
     ['TokenExpiredError', 401], //JWT token expired error 
@@ -16,12 +12,20 @@ const StatusCodes = new Map([
 
 // development errors
 const devErrors = (err, res) => {
-    // handles both operational and non-operational errors using StatusCodes map
-
      // double check.. if the error is thrown by a framework then 
     // we look up in StatusCode map ,if not found then its a SERVER ERROR
-    const statusCode = err.statusCode || StatusCodes.get(err.name) || 500;
+    let statusCode = err.statusCode || OPERATIONAL_ERRORS.get(err.name) || 500;
     const errName = err.name || 'InternalServerError';
+
+    // mark it as operational if not a server error
+    if(statusCode != 500){
+        err.isOperational = true;
+    }
+
+    // check for mongoDB duplication error
+    if(err.code == 11000 && err.name == 'MongoServerError'){
+        statusCode = OPERATIONAL_ERRORS.get(err.code)
+    }
 
     // return err response
     return res.status(statusCode).json({
@@ -47,7 +51,7 @@ const GlobalErrorHandler = (err, req, res, next) => {
         // error details
         const message = err.message || "Something went wrong! please try again later."
         const statusCode = err.statusCode || 500
-        o
+
         return res.status(statusCode || 500).json({
             status: 'fail',
             message
