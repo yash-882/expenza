@@ -28,6 +28,30 @@ export const verifyRefreshJWT = (refreshToken) => {
     return decoded;
 }
 
+// reissue Access Token 
+export const exchangeJWT = (accessToken, refreshToken) => {
+    // verify access token first
+    //if err occurs, throws all errors except TokenExpiredError
+    verifyAccessJWT(accessToken);
+
+    // verify refresh token
+    // will throw all JWT errors, if occurs
+    const decoded = verifyRefreshJWT(refreshToken);
+
+    // assign only ID in refresh token because
+    // if the info(email, username) is changed we have to query DB on every request for newer info 
+    // which may result in performance degradation
+
+
+    // ACCESS TOKEN WAS EXPIRED,  REISSUANCE...
+    // payload
+    const payload = { id: decoded.id }
+
+    // reissue access tokens
+    return signAccessJWT(payload);
+
+}
+
 // Sign Refresh Tokens
 export const signRefreshJWT = (payload) => {
     const refreshToken = jwt.sign({
