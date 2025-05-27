@@ -8,7 +8,9 @@ authRouter.route('/sign-up')
 
 // login user after authentication is successful
 authRouter.route('/login')
-.post(authController.authenticateUser, authController.loginUser)
+.post(authController.isAlreadyLoggedIn,
+    authController.authenticateUser, 
+    authController.loginUser)
 
 
 export default authRouter

@@ -84,6 +84,66 @@ const loginUser = wrapper(async (req, res, next) => {
     })
 })
 
+// checks if the user is already logged in
+// THIS WILL SEND EITHER A GOOD RESPONSE OR ALLOW THE USER TO LOGIN
+const isAlreadyLoggedIn = wrapper((req, res, next) => {
+
+    // THE CUSTOM JWT MODULE CAN THROW ERROR AND CALL THE GlobalErrorHandler
+    //TO AVOID CALLING THE GlobalErrorHandler, nested try catch block is used
+
+    try {
+        const accessToken = req.cookies.AT;
+
+        // returns an err object(except expiration error) or decoded token
+        const token = accessToken ? verifyAccessJWT(accessToken) : undefined;
+
+        // is token expired / missing?
+        if (!token || token.name == 'TokenExpiredError') {
+            const refreshToken = req.cookies.RT
+            // will throw err if Refresh token is also expired or invalid
+            if (!refreshToken) {
+                res.clearCookie('AT', {httpOnly:true})
+                // user have to login again
+                return next();
+            }
+
+        let newAccessToken;
+
+        // access token is not provided
+        if(!token){
+            // will throw err if Refresh token is also expired or invalid
+        let payload = verifyRefreshJWT(refreshToken) //returns payload
+
+        // signing access token...
+        newAccessToken = signAccessJWT({id: payload.id})
+        }
+
+        // access token is provided
+         else
+        newAccessToken = exchangeJWT(token, refreshToken)
+
+           //store in cookies 
+            res.cookie('AT', newAccessToken, {
+                httpOnly: true, 
+                maxAge: 15 * 60 * 1000 //15 minutes
+            }) 
+        }
+        // user is already logged in
+        return sendResponse(res, {
+            statusCode: 200,
+            message: 'You are already logged in',
+        })
+    }
+    catch (err) {
+        //allowing the user to go to /login
+        res.clearCookie('AT', { httpOnly: true }) //delete Access Token from cookies section
+        res.clearCookie('RT', { httpOnly: true }) //delete Refresh Token from cookies section
+
+        return next();
+    }
+})
+
+
 // protect routes
 const protect = wrapper(async (req, res, next) => {
     // extract token
@@ -175,5 +235,6 @@ export default {
     createUser,
     loginUser,
     authenticateUser,
-    protect
+    protect,
+    isAlreadyLoggedIn
 }
