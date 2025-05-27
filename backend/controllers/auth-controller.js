@@ -2,6 +2,7 @@ import CustomError from "../errors/custom-error-class.js";
 import userModel from "../models/user-model.js";
 import sendResponse from "../utils/functions/api-response.js";
 import bcrypt from 'bcrypt';
+import { decodeToken, exchangeJWT, signRefreshJWT, signAccessJWT, verifyAccessJWT } from "../utils/functions/jwt/jwt-auth.js";
 
 // wrapper for reusability
 function wrapper(controller) {
@@ -62,8 +63,8 @@ const loginUser = wrapper(async (req, res, next) => {
     //user after authentication is successful
     const user = req.user;
 
-    const ACCESS_TOKEN = signAccessJWT({id:user._id}); //access token
-    const REFRESH_TOKEN = signRefreshJWT({id:user._id}); //refresh token
+    const ACCESS_TOKEN = signAccessJWT({ id: user._id }); //access token
+    const REFRESH_TOKEN = signRefreshJWT({ id: user._id }); //refresh token
 
     // Access token (short lived)
     res.cookie('AT', ACCESS_TOKEN,{
@@ -81,6 +82,62 @@ const loginUser = wrapper(async (req, res, next) => {
         message: 'You have logged in to your account',
         statusCode: 200
     })
+})
+
+// protect routes
+const protect = wrapper(async (req, res, next) => {
+    // extract token
+    const bearerToken = req.headers.authorization;
+
+    // if does not start with 'Bearer'
+    if (!(bearerToken && bearerToken.startsWith('Bearer '))) {
+        return next(new CustomError({
+            name: 'UnauthorizedError',
+            message: 'You are not authorized to this page. Please login'
+        }, 401))
+    }
+
+    // extract jwt token
+    const token = bearerToken.split(' ')[1]
+
+    //returns the decoded token or throws errors except TokenExpiredError
+    let jwtData = verifyAccessJWT(token);
+
+    // is token expired?
+    if (jwtData.name == 'TokenExpiredError') {
+        const refreshToken = req.cookies.RT
+
+        if(!refreshToken){
+            res.clearCookie('AT', {httpOnly: true})
+              return next(new CustomError({
+            name: 'UnauthorizedError',
+            message: 'You are not authorized to this page. Please login'
+        }, 401))
+        }
+        // will throw err if Refresh token is also expired or invalid
+        const newToken = exchangeJWT(token, refreshToken) //returns new Access token
+        res.cookie('AT', newToken) //store in cookies
+
+        // new user's token   
+        jwtData = decodeToken(newToken)
+    }
+
+    let userInDB = await userModel.findById(jwtData.id)
+
+    if(!userInDB){
+        // clear tokens
+        res.clearCookie('AT', {httpOnly: true})
+        res.clearCookie('RT', {httpOnly: true})
+        return next(new CustomError({
+            name: 'NotFoundError',
+            message: 'The profile is not found.'
+
+        }, 404))
+    }
+
+    // user is authorized
+    req.user = userInDB
+    next()
 })
 
 
@@ -109,5 +166,6 @@ const createUser = wrapper(async (req, res, next) => {
 export default {
     createUser,
     loginUser,
-    authenticateUser
+    authenticateUser,
+    protect
 }
