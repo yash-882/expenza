@@ -84,6 +84,58 @@ const loginUser = wrapper(async (req, res, next) => {
     })
 })
 
+// checks if the user is already logged in
+// THIS WILL SEND EITHER A GOOD RESPONSE OR ALLOW THE USER TO LOGIN
+const isAlreadyLoggedIn = wrapper((req, res, next) => {
+    // extract token
+    const bearerToken = req.headers.authorization;
+    // if the request is new
+    if (!bearerToken || !bearerToken.startsWith('Bearer ')) {
+        //clear tokens from cookies section, if exist
+        res.clearCookie('AT', { httpOnly: true })
+        res.clearCookie('RT', { httpOnly: true })
+        return next()
+    }
+
+    // access token
+    const token = bearerToken.split(' ')[1]
+    
+    // THE CUSTOM JWT MODULE CAN THROW ERROR AND CALL THE GlobalErrorHandler
+    //TO AVOID CALLING THE GlobalErrorHandler, nested try catch block is used
+    try {
+        // returns an err object or decoded token (except expiration error)
+        const result = verifyAccessJWT(token);
+
+        // is token expired?
+        if (result.name == 'TokenExpiredError') {
+            const refreshToken = req.cookies.RT
+            // will throw err if Refresh token is also expired or invalid
+            if (!refreshToken) {
+                res.clearCookie('AT')
+                // user have to login again
+                return next();
+            }
+
+            // returns a new JWT or throw error
+            const newToken = exchangeJWT(token, refreshToken)
+            res.cookie('AT', newToken) //store in cookies
+        }
+        // user is already logged in
+        return sendResponse(res, {
+            statusCode: 200,
+            message: 'You are already logged in',
+        })
+    }
+    catch (err) {   
+        //allowing the user to go to /login
+        res.clearCookie('AT', { httpOnly: true }) //delete Access Token from cookies section
+        res.clearCookie('RT', { httpOnly: true }) //delete Refresh Token from cookies section
+
+        return next();
+    }
+})
+
+
 // protect routes
 const protect = wrapper(async (req, res, next) => {
     // extract token
@@ -167,5 +219,6 @@ export default {
     createUser,
     loginUser,
     authenticateUser,
-    protect
+    protect,
+    isAlreadyLoggedIn
 }
