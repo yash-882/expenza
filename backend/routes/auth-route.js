@@ -12,6 +12,8 @@ authRouter.route('/login')
     authController.authenticateUser, 
     authController.loginUser)
 
+authRouter.route('/reset-password-otp')
+.get(authController.resetPassword)
 
 export default authRouter
 
