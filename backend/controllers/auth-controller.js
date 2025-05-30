@@ -2,7 +2,10 @@ import CustomError from "../errors/custom-error-class.js";
 import userModel from "../models/user-model.js";
 import sendResponse from "../utils/functions/api-response.js";
 import bcrypt from 'bcrypt';
+import nodemailer from "../utils/functions/nodemailer/nodemailer.js";
 import { decodeToken, exchangeJWT, signRefreshJWT, signAccessJWT, verifyAccessJWT } from "../utils/functions/jwt/jwt-auth.js";
+import OTPModel from "../models/otp-model.js";
+import jwt from "jsonwebtoken";
 
 // wrapper for reusability
 function wrapper(controller) {
@@ -39,7 +42,7 @@ const authenticateUser = wrapper(async (req, res, next) => {
     if (!user)
         return next(new CustomError({
             name: 'NotFoundError',
-            message: "The Username is incorrect or doesn't exist",
+            message: "The Email is incorrect or not registered with us",
         }, 404))
 
     // user exists
@@ -126,7 +129,7 @@ const isAlreadyLoggedIn = wrapper((req, res, next) => {
             message: 'You are already logged in',
         })
     }
-    catch (err) {   
+    catch (err) {
         //allowing the user to go to /login
         res.clearCookie('AT', { httpOnly: true }) //delete Access Token from cookies section
         res.clearCookie('RT', { httpOnly: true }) //delete Refresh Token from cookies section
@@ -135,6 +138,87 @@ const isAlreadyLoggedIn = wrapper((req, res, next) => {
     }
 })
 
+// reset password via OTP
+const resetPassword = wrapper(async (req, res, next) => {
+    const user = req.body;
+
+    // no email is provided
+    if (!user || !user.email) {
+        return next(new CustomError({
+            name: 'BadRequestError',
+            message: 'Email is required'
+        }), 400)
+    }
+
+    // checks if user is registered 
+    const userInDB = await userModel.findOne({ email: user.email })
+
+
+    // if doesn't exist
+    if (!userInDB) {
+        return next(new CustomError({
+            name: 'NotFoundError',
+            message: "The Email is incorrect or not registered with us"
+        }, 404))
+    }
+    //generate 6 digits OTP
+    const OTP = Math.floor(Math.random() * 900000) + 100000;
+
+    // hashed password
+    const hashedOTP = await bcrypt.hash(String(OTP), 12)
+
+    const isAlreadyRequested = await OTPModel.findOne({ email: user.email })
+
+    // if user has already requested an OTP
+    if (isAlreadyRequested) {
+        // overwrite the old requested OTP with the new one
+        await OTPModel.updateOne({ email: userInDB.email }, { '$set': { otp: hashedOTP } })
+
+        // sending OTP...
+        await sendOTP(OTP, userInDB.email)  
+    }
+
+    // 1st request of requesting OTP
+    else {
+        // store OTP in DB
+        await OTPModel.create({ email: userInDB.email, otp: hashedOTP })
+        // sending OTP... 
+        await sendOTP(OTP, userInDB.email)
+    }
+
+    // sign token to identify email
+    const token = jwt.sign({
+        email:userInDB.email,
+        type:'email-identifier'
+    }, process.env.JWT_SECKEY_AT,
+{expiresIn: '5m'})
+
+    //storing Email is cookies to remember who requested the otp
+    res.cookie('reset_pass_token1', token,{
+        httpOnly: true,
+        maxAge: 10 * 60 * 1000 //expires in 10 minutes
+    })
+
+    sendResponse(res, {
+        statusCode: 200,
+        message: 'OTP has been sent to your Email'
+    })
+})
+
+// send OTP to user's Email
+const sendOTP = async (OTP, email) => {
+    // sending...
+    await nodemailer.sendMail({
+        from: `Expenza <${process.env.GMAIL}>`, //app's name
+        subject: 'Reset Password',
+        to: email, //receiver Email
+
+        html: `<p style='font-size:16px;'>
+        Your OTP for resetting the Password is <b style='font-size:20px;'>
+        ${OTP}
+        </b></p>`
+    })
+}
 
 // protect routes
 const protect = wrapper(async (req, res, next) => {
@@ -192,8 +276,6 @@ const protect = wrapper(async (req, res, next) => {
     next()
 })
 
-
-
 // Sign up 
 const createUser = wrapper(async (req, res, next) => {
     // if body is not provided
@@ -220,5 +302,6 @@ export default {
     loginUser,
     authenticateUser,
     protect,
-    isAlreadyLoggedIn
+    isAlreadyLoggedIn,
+    resetPassword
 }
