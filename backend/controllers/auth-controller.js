@@ -213,6 +213,76 @@ const resetPassword = wrapper(async (req, res, next) => {
     })
 })
 
+// validate OTP
+const validateOTP = wrapper(async (req, res, next) => {
+    const OTPDetails = req.body;
+    // no otp is provided
+    if (!OTPDetails || !OTPDetails.otp) {
+        return next(new CustomError({
+            name: 'BadRequestError',
+            message: 'Please enter OTP!'
+        }, 400))
+    }
+    
+    // getting email from cookies to identify the client who requested the OTP
+    const token = req.cookies.reset_pass_token1
+    // if the user never requested the OTP
+    if(!token){
+         return next(new CustomError({
+            name: 'NotFoundError',
+            message: 'Session has been expired, please restart the password reset process'
+        }, 404))
+    }
+    
+    // throws error and call GlobalErrhHandler except expiration error or decoded token
+    const result = verifyAccessJWT(token)
+    
+    // entered OTP
+    const enteredOTP = OTPDetails.otp;
+    
+    // query OTP document
+    const OTPInDB = await OTPModel.findOne({ email: result.email })
+    
+    // OTP expires
+    if (result.name == 'TokenExpiredError' || !OTPInDB) {
+        // remove token from cookies
+        res.clearCookie('reset_pass_token1', {httpOnly:true})
+        return next(new CustomError({
+            name: 'NotFoundError',
+            message: 'The OTP has been expired, please request a new one.'
+        }, 404))
+    }
+    
+    // compare the hashed one with plain OTP text entered by user
+    const isOTPCorrect = await bcrypt.compare(enteredOTP, OTPInDB.otp)
+    
+    // Incorrect OTP
+    if (!isOTPCorrect) {
+        return next(new CustomError({
+            name: 'UnauthorizedError',
+            message: 'Incorrect OTP!'
+        }, 401))
+    }
+    
+    // sign token for changing the Password
+    const OTPToken = jwt.sign({
+        email: result.email,
+        type: 'otp',
+    }, process.env.JWT_SECKEY_AT, {
+        expiresIn:'5m' 
+    })
+    
+    // cookie for /change-password indicates that the OTP has been verified
+    res.cookie('reset_pass_token2', OTPToken, {
+        httpOnly: true,
+        maxAge: 5 * 60 * 1000 //5 minutes
+    })
+    // OTP was correct
+    sendResponse(res, {
+        message: 'Your OTP was correct'
+    })
+})
+
 // send OTP to user's Email
 const sendOTP = async (OTP, email) => {
     // sending...
@@ -319,5 +389,6 @@ export default {
     authenticateUser,
     protect,
     isAlreadyLoggedIn,
+    validateOTP,
     resetPassword
 }
