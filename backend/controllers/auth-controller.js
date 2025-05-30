@@ -291,6 +291,69 @@ const sendOTP = async (OTP, email) => {
     })
 }
 
+const changePassword = wrapper(async (req, res, next) => {
+    const token = req.cookies.reset_pass_token2;
+
+    // throws error except expiration error or decoded token
+    const result = token ? verifyAccessJWT(token) : undefined;
+
+    // checks if the token is expired
+    const isTokenExpired = result && result.name == 'TokenExpiredError';
+
+      if(!result || isTokenExpired){
+         return next(new CustomError({
+            name: 'NotFoundError',
+            message: 'Session has been expired, please restart the password reset process'
+        }, 404))
+    }
+
+    // getting new credentials
+    const credentials = req.body;
+    
+    if(!credentials.password || !credentials.confirmPassword){
+        return next(new CustomError({
+            name: 'BadRequestError',
+            message: 'Please enter Password or confirm Password correctly'
+        }, 400))
+    }
+    
+    // compare re-entered password with the actual one
+    if(credentials.password != credentials.confirmPassword){
+         return next(new CustomError({
+            name: 'BadRequestError',
+            message: 'Please confirm your Password correctly'
+        }, 400))
+    }
+
+    const user = await userModel.findOne({email: result.email})
+    
+    // checks if the new entered Password is not different from the Password stored in DB
+    const isPasswordSame = await bcrypt.compare(credentials.password, user.password)
+    
+    if(isPasswordSame){
+        return next(new CustomError({
+            message: 'New Password must be different from the previous one'
+        }))
+    }
+
+    // hashing the new Password...
+    const hashedPassword = await bcrypt.hash(credentials.password, 12)
+
+    // updating Password...
+    await userModel.updateOne({email: result.email}, {'$set': {password: hashedPassword}})
+
+    // clear tokens after updation
+    res.clearCookie('reset_pass_token1', {httpOnly: true})
+    res.clearCookie('reset_pass_token2', {httpOnly: true})
+
+    // Delete OTP document after updation...
+    await OTPModel.deleteOne({email: result.email})
+
+    sendResponse(res, {
+        message: 'The Password has been updated. You can use your new Password now.'
+    })
+})
+
 // protect routes
 const protect = wrapper(async (req, res, next) => {
     // extract token
@@ -375,5 +438,6 @@ export default {
     protect,
     isAlreadyLoggedIn,
     validateOTP,
-    resetPassword
+    resetPassword,
+    changePassword
 }
