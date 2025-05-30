@@ -200,7 +200,7 @@ const resetPassword = wrapper(async (req, res, next) => {
     })
 
     sendResponse(res, {
-        statusCode: 200,
+        statusCode: 201,
         message: 'OTP has been sent to your Email'
     })
 })
@@ -271,6 +271,7 @@ const validateOTP = wrapper(async (req, res, next) => {
     })
     // OTP was correct
     sendResponse(res, {
+        statusCode: 201,
         message: 'Your OTP was correct'
     })
 })
