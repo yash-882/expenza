@@ -3,11 +3,14 @@ import mongoose from "mongoose";
 const OTPSchema = mongoose.Schema({
     otp: {
         type: String,
-        unique: true
+        unique: true,
+        trim: true
     },
     email: {
         type: String,
-        unique: true
+        unique: true,
+        trim: true,
+        lowercase: true
     },
     createdAt: {
         type: Date,
