@@ -12,11 +12,17 @@ authRouter.route('/login')
     authController.authenticateUser, 
     authController.loginUser)
 
+// request OTP
 authRouter.route('/reset-password-otp')
 .post(authController.resetPassword)
 
+// submit OTP
 authRouter.route('/reset-password-otp/submit')
 .post(authController.validateOTP)
+
+// change password if OTP verification was successful
+authRouter.route('/reset-password-otp/change-password')
+.patch(authController.changePassword)
 
 export default authRouter
 
