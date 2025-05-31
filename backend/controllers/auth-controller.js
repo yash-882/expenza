@@ -183,26 +183,29 @@ const resetPassword = wrapper(async (req, res, next) => {
         await OTPModel.updateOne({ email: userInDB.email }, { '$set': { otp: hashedOTP } })
 
         // sending OTP...
-        await sendOTP(OTP, userInDB.email)  
+        await sendOTP(OTP, userInDB.email)
     }
 
     // 1st request of requesting OTP
     else {
         // store OTP in DB
-        await OTPModel.create({ email: userInDB.email, otp: hashedOTP })
+        await OTPModel.create({ 
+            email: userInDB.email, 
+            otp: hashedOTP,
+        })
         // sending OTP... 
         await sendOTP(OTP, userInDB.email)
     }
 
     // sign token to identify email
     const token = jwt.sign({
-        email:userInDB.email,
-        type:'email-identifier'
+        email: userInDB.email,
+        type: 'email-identifier'
     }, process.env.JWT_SECKEY_AT,
-{expiresIn: '5m'})
+        { expiresIn: '10m' })
 
     //storing Email is cookies to remember who requested the otp
-    res.cookie('reset_pass_token1', token,{
+    res.cookie('OTP_validation', token, {
         httpOnly: true,
         maxAge: 10 * 60 * 1000 //expires in 10 minutes
     })
@@ -213,69 +216,129 @@ const resetPassword = wrapper(async (req, res, next) => {
     })
 })
 
+const limitOTPAttempts = wrapper(async (req, res, next) => {
+    
+    // token that allows validation process of an OTP
+    const validationToken = req.cookies.OTP_validation
+    //throws errors except the expiration error or returns a decoded token
+    const validationResult = validationToken ? verifyAccessJWT(validationToken) : undefined
+    
+    // returning same response on both token expiration 
+    // and if no validation token(cookie) is provided
+    if (!validationResult || (validationResult && validationResult.name == 'TokenExpiredError')) {
+        return next(new CustomError({
+            name: 'NotFoundError',
+            message: 'Session has been expired. Please restart the password reset process.'
+        }, 404))
+    }
+    
+ 
+    // check if user is temporarily blocked from OTP validation
+    const limitAttemptsToken = req.cookies.OTP_Attempts;
+
+    if(limitAttemptsToken){
+       const attemptsResult = verifyAccessJWT(limitAttemptsToken)
+
+    //    if expired.. means user can now make attemps again
+       if(attemptsResult.name === 'TokenExpiredError'){
+        // allow user to try atempts again
+        res.clearCookie('OTP_Attempts', {httpOnly: true})
+       } 
+    //    user is still not allowed to the validation process
+       else{ 
+        return next(new CustomError({
+            name: 'TooManyRequests',
+            message: 'You have reached the limit for OTP attempts. Try again later.'
+        }, 429))
+       }
+}
+
+    // querying to check the expiration
+    const OTPInDB = await OTPModel.findOne({ email: validationResult.email })
+    
+    // if OTP is expired
+    if (!OTPInDB) {
+
+        return next(new CustomError({
+            name: 'NotFoundError',
+            message: 'OTP has been expired. Please request a new one.'
+        }, 404))
+    }
+
+    // user is out of attempts
+    if (OTPInDB && OTPInDB.attemptCount >= 5) {
+        // once the user is out of attempts, we avoid DB queries for attemptCount
+        // and assign a token indicates that the OTP validation is not allowed for 5 minutes
+        const OTPAttempts = jwt.sign({type:'limit-otp-attempts'}, 
+            process.env.JWT_SECKEY_AT,
+            {expiresIn: '5m'}
+        )
+
+        // store token
+        res.cookie('OTP_Attempts', OTPAttempts, 
+            {httpOnly: true},
+            {maxAge: 5 * 60 * 1000 } //5 minutes
+        )
+
+        return next(new CustomError({
+            name: 'TooManyRequests',
+            message: 'You have reached the limit for OTP attempts. Try again later.'
+        }, 429))
+    }
+
+// user has attempts
+req.OTPDetails = OTPInDB;
+next();
+})
+
 // validate OTP
 const validateOTP = wrapper(async (req, res, next) => {
-    const OTPDetails = req.body;
+    const body = req.body;
     // no otp is provided
-    if (!OTPDetails || !OTPDetails.otp) {
+    if (!body || !body.otp) {
         return next(new CustomError({
             name: 'BadRequestError',
             message: 'Please enter OTP!'
         }, 400))
     }
+
+    // valid OTP
+    const hashedValidOTP = req.OTPDetails.otp;
+    console.log(hashedValidOTP);
     
-    // getting email from cookies to identify the client who requested the OTP
-    const token = req.cookies.reset_pass_token1
-    // if the user never requested the OTP
-    if(!token){
-         return next(new CustomError({
-            name: 'NotFoundError',
-            message: 'Session has been expired, please restart the password reset process'
-        }, 404))
-    }
-    
-    // throws error and call GlobalErrhHandler except expiration error or decoded token
-    const result = verifyAccessJWT(token)
-    
+    const userEmail = req.OTPDetails.email;
+
     // entered OTP
-    const enteredOTP = OTPDetails.otp;
-    
-    // query OTP document
-    const OTPInDB = await OTPModel.findOne({ email: result.email })
-    
-    // OTP expires
-    if (result.name == 'TokenExpiredError' || !OTPInDB) {
-        // remove token from cookies
-        res.clearCookie('reset_pass_token1', {httpOnly:true})
-        return next(new CustomError({
-            name: 'NotFoundError',
-            message: 'The OTP has been expired, please request a new one.'
-        }, 404))
-    }
-    
+    const enteredOTP = req.body.otp;
+
     // compare the hashed one with plain OTP text entered by user
-    const isOTPCorrect = await bcrypt.compare(enteredOTP, OTPInDB.otp)
-    
+    const isOTPCorrect = await bcrypt.compare(enteredOTP, hashedValidOTP)
+
     // Incorrect OTP
     if (!isOTPCorrect) {
+        // update wrong attempts count
+        await OTPModel.updateOne(
+            {email: userEmail}, 
+        {'$inc': {attemptCount:1}})
+
         return next(new CustomError({
             name: 'UnauthorizedError',
             message: 'Incorrect OTP!'
         }, 401))
     }
-    
+
     // sign token for changing the Password
-    const OTPToken = jwt.sign({
-        email: result.email,
+    const changePassToken = jwt.sign({
+        email: userEmail,
         type: 'otp',
     }, process.env.JWT_SECKEY_AT, {
-        expiresIn:'5m' 
-    })
-    
+        expiresIn: '3m'
+    }) 
+
     // cookie for /change-password indicates that the OTP has been verified
-    res.cookie('reset_pass_token2', OTPToken, {
+    res.cookie('change_password', changePassToken, {
         httpOnly: true,
-        maxAge: 5 * 60 * 1000 //5 minutes
+        maxAge: 3 * 60 * 1000 //3 minutes
     })
     // OTP was correct
     sendResponse(res, {
@@ -300,45 +363,46 @@ const sendOTP = async (OTP, email) => {
 }
 
 const changePassword = wrapper(async (req, res, next) => {
-    const token = req.cookies.reset_pass_token2;
+    // token that is assigned after successful OTP validation 
+    const token = req.cookies.change_password;
 
     // throws error except expiration error or decoded token
-    const result = token ? verifyAccessJWT(token) : undefined;
+    const validationResult = token ? verifyAccessJWT(token) : undefined;
 
     // checks if the token is expired
-    const isTokenExpired = result && result.name == 'TokenExpiredError';
+    const isTokenExpired = validationResult && validationResult.name == 'TokenExpiredError';
 
-      if(!result || isTokenExpired){
-         return next(new CustomError({
+    if (!validationResult || isTokenExpired) {
+        return next(new CustomError({
             name: 'NotFoundError',
-            message: 'Session has been expired, please restart the password reset process'
+            message: 'Session has been expired. Please restart the password reset process.'
         }, 404))
     }
 
     // getting new credentials
     const credentials = req.body;
-    
-    if(!credentials.password || !credentials.confirmPassword){
+
+    if (!credentials || !credentials.password || !credentials.confirmPassword) {
         return next(new CustomError({
             name: 'BadRequestError',
             message: 'Please enter all required fields'
         }, 400))
     }
-    
+
     // compare re-entered password with the actual one
-    if(credentials.password != credentials.confirmPassword){
-         return next(new CustomError({
+    if (credentials.password != credentials.confirmPassword) {
+        return next(new CustomError({
             name: 'BadRequestError',
-            message: 'Please confirm your Password correctly'
+            message: 'Confirm your Password correctly!'
         }, 400))
     }
 
-    const user = await userModel.findOne({email: result.email})
-    
+    const user = await userModel.findOne({ email: validationResult.email })
+
     // checks if the new entered Password is not different from the Password stored in DB
     const isPasswordSame = await bcrypt.compare(credentials.password, user.password)
-    
-    if(isPasswordSame){
+
+    if (isPasswordSame) {
         return next(new CustomError({
             name: 'BadRequestError',
             message: 'New Password must be different from the previous one'
@@ -349,14 +413,16 @@ const changePassword = wrapper(async (req, res, next) => {
     const hashedPassword = await bcrypt.hash(credentials.password, 12)
 
     // updating Password...
-    await userModel.updateOne({email: result.email}, {'$set': {password: hashedPassword}})
+    await userModel.updateOne({ email: validationResult.email }, 
+        { '$set': { password: hashedPassword } })
 
     // clear tokens after updation
-    res.clearCookie('reset_pass_token1', {httpOnly: true})
-    res.clearCookie('reset_pass_token2', {httpOnly: true})
+    res.clearCookie('OTP_validation', { httpOnly: true })
+    res.clearCookie('change_password', { httpOnly: true })
+    res.clearCookie('OTP_Attempts', { httpOnly: true })
 
     // Delete OTP document after updation...
-    await OTPModel.deleteOne({email: result.email})
+    await OTPModel.deleteOne({ email: validationResult.email })
 
     sendResponse(res, {
         message: 'The Password has been updated. You can use your new Password now.'
@@ -456,5 +522,6 @@ export default {
     isAlreadyLoggedIn,
     validateOTP,
     resetPassword,
-    changePassword
+    changePassword,
+    limitOTPAttempts
 }
