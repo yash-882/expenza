@@ -14,7 +14,8 @@ authRouter.route('/login')
 
 // request OTP
 authRouter.route('/reset-password-otp')
-.post(authController.resetPassword)
+.post(authController.limitOTPRequests,
+    authController.resetPassword)
 
 // submit OTP
 authRouter.route('/reset-password-otp/submit')
