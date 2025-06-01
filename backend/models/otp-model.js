@@ -12,6 +12,11 @@ const OTPSchema = mongoose.Schema({
         trim: true,
         lowercase: true
     },
+    requestCount:{
+        type:Number,
+        default:1,
+        min:0
+    },
     attemptCount:{
         type:Number,
         default:0,

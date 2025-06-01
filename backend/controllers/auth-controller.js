@@ -138,10 +138,41 @@ const isAlreadyLoggedIn = wrapper((req, res, next) => {
     }
 })
 
+// temporary block OTP request if user exceeded the limit
+// (it's just a helper function that avoids DB queries of requestCount in resetPassword,
+//the initiatial block of request happens in resetPassword itself)
+const limitOTPRequests = wrapper(async (req, res, next) => {
+    // token that temporarily block OTP requests 
+    const limitRequestsToken = req.cookies.OTP_requests;
+
+// if user is temporarily blocked from requesting OTPs
+    if (limitRequestsToken) {
+        //throws errors except the expiration error or returns a decoded token
+        const validationResult = verifyAccessJWT(limitRequestsToken)
+
+        // user can request again
+        if (validationResult.name === 'TokenExpiredError') {
+            res.clearCookie('OTP_requests', {httpOnly:true})
+
+            //user can now request again
+            return next()
+        }
+        
+        return next(new CustomError({
+            name: 'TooManyRequests',
+            message: 'Too many OTP requests. Try again later.'
+        }))
+    }
+
+    // first request attempt
+    next()
+})
+
+
 // reset password via OTP
 const resetPassword = wrapper(async (req, res, next) => {
     const user = req.body;
-
+    
     // no email is provided
     if (!user || !user.email) {
         return next(new CustomError({
@@ -149,11 +180,10 @@ const resetPassword = wrapper(async (req, res, next) => {
             message: 'Email is required'
         }), 400)
     }
-
+    
     // checks if user is registered 
     const userInDB = await userModel.findOne({ email: user.email })
-
-
+    
     // if doesn't exist
     if (!userInDB) {
         return next(new CustomError({
@@ -164,36 +194,59 @@ const resetPassword = wrapper(async (req, res, next) => {
     //generate 6 digits OTP
     const OTP = Math.floor(Math.random() * 900000) + 100000;
 
+    const isAlreadyRequested = await OTPModel.findOne({ email: user.email })
+    
+    if(isAlreadyRequested && isAlreadyRequested.requestCount >= 5){
+
+        // once the user is out of OTP request attempts, we avoid DB queries for requestCount
+        // and assign a token indicates that the OTP validation is not allowed for 5 minutes
+          const requestAttempts = jwt.sign({ type: 'limit-otp-requests' },
+            process.env.JWT_SECKEY_AT,
+            { expiresIn: '5m' })
+
+        // store token
+        res.cookie('OTP_requests', requestAttempts,
+            {httpOnly:true, maxAge: 5 * 60 * 1000 } //5 minutes
+        )
+
+        return next(new CustomError({
+            name: 'TooManyRequests',
+            message: 'Too many OTP requests. Try again later.'
+        }))
+    }
+    
     // hashed password
     const hashedOTP = await bcrypt.hash(String(OTP), 12)
-
-    const isAlreadyRequested = await OTPModel.findOne({ email: user.email })
 
     // if user has already requested an OTP
     if (isAlreadyRequested) {
         // overwrite the old requested OTP with the new one
-        await OTPModel.updateOne({ email: userInDB.email }, { '$set': { otp: hashedOTP } })
-
-        // sending OTP...
-        await sendOTP(OTP, userInDB.email)
-    }
-
-    // 1st request of requesting OTP
-    else {
-        // store OTP in DB
-        await OTPModel.create({ 
-            email: userInDB.email, 
-            otp: hashedOTP,
-        })
-        // sending OTP... 
-        await sendOTP(OTP, userInDB.email)
-    }
-
-    // sign token to identify email
-    const token = jwt.sign({
-        email: userInDB.email,
-        type: 'email-identifier'
-    }, process.env.JWT_SECKEY_AT,
+        await OTPModel.updateOne({ email: userInDB.email },
+            {
+                '$set': { otp: hashedOTP },
+                '$inc': { requestCount: 1 }
+            })
+            
+            // sending OTP...
+            await sendOTP(OTP, userInDB.email)
+        }
+        
+        // 1st request of requesting OTP
+        else {
+            // store OTP in DB
+            await OTPModel.create({ 
+                email: userInDB.email, 
+                otp: hashedOTP,
+            })
+            // sending OTP... 
+            await sendOTP(OTP, userInDB.email)
+        }
+        
+        // sign token to identify email
+        const token = jwt.sign({
+            email: userInDB.email,
+            type: 'email-identifier'
+        }, process.env.JWT_SECKEY_AT,
         { expiresIn: '10m' })
 
     //storing Email is cookies to remember who requested the otp
@@ -411,6 +464,7 @@ const changePassword = wrapper(async (req, res, next) => {
     res.clearCookie('OTP_validation', { httpOnly: true })
     res.clearCookie('change_password', { httpOnly: true })
     res.clearCookie('OTP_Attempts', { httpOnly: true })
+    res.clearCookie('OTP_requests', { httpOnly: true })
 
     // Delete OTP document after updation...
     await OTPModel.deleteOne({ email: validationResult.email })
@@ -506,5 +560,6 @@ export default {
     validateOTP,
     resetPassword,
     changePassword,
-    limitOTPAttempts
+    limitOTPAttempts,
+    limitOTPRequests
 }
