@@ -31,7 +31,13 @@ const userSchema = mongoose.Schema({
     createdAt: {
         type: Date,
         default: Date.now
-    }
+    },
+    lastUpdated: {
+        type: Date,
+        default: Date.now
+
+    } 
+    
 })
 
 userSchema.pre('save', async function (next) {
@@ -41,6 +47,9 @@ userSchema.pre('save', async function (next) {
 
     this.password = await bcrypt.hash(this.password, 12);
     this.confirmPassword = undefined;
+
+    // mongoDB will automatically executes this date func and converts to ISOSrting
+    this.lastUpdated = Date.now
 
     return next();
 })
