@@ -78,7 +78,10 @@ const getTransactionByID = wrapper(async(req, res, next) => {
 // get transactions
 const getTransactions = wrapper(async(req, res, next) => {
     const userID = req.user._id //user's ID
-    const transactions =  await transactionModel.find({user: userID})
+    const filter = req.filteredQuery; //sanitized query
+
+    const transactions =  await transactionModel.find(
+        {...filter.query, user: userID}).sort(filter.sortBy).select(filter.selectedFields)
 
     // no transactions were found
     if(transactions.length == 0){
@@ -172,9 +175,11 @@ const deleteTransactionByID = wrapper(async(req, res, next) => {
 // delete multiple transactions
 const deleteTransactions = wrapper(async(req, res, next) => {
     const userID = req.user._id; //user's ID
+    const filter = req.filteredQuery;
+    
     // delete all...
     const transaction =  await transactionModel.deleteMany({
-        ...req.query, 
+        ...filter.query, 
         user: userID})
 
     // no transactions were found
