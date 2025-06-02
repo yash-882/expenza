@@ -1,11 +1,15 @@
+import { TransactionFields } from "../constants/DB-collections-fields.js";
 import CustomError from "../errors/custom-error-class.js";
 import transactionModel from "../models/transaction-model.js";
 import sendResponse from "../utils/functions/api-response.js";
+import handleQuery from "../utils/functions/handle-query.js";
 
 // wrapper for reusability
 function wrapper(controller) {
     return async (req, res, next) => {
         try {
+            // handle query strings
+            handleQuery(req, TransactionFields)
             // results
             await controller(req, res, next);
         } catch (err) {
