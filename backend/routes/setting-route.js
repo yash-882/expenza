@@ -14,5 +14,13 @@ settingRouter.route('/change-password')
 settingRouter.route('/logout')
 .get(settingController.logout)
 
+// account details
+settingRouter.route('/account-details')
+.get(settingController.accountDetails)
+
+// delete account
+settingRouter.route('/delete-account')
+.delete(settingController.deleteAccount)
+
 
 export default settingRouter;
