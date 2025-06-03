@@ -561,6 +561,21 @@ const createUser = wrapper(async (req, res, next) => {
     // remove password from response
     newUser.password = undefined
 
+    const ACCESS_TOKEN = signAccessJWT({ id: newUser._id }); //access token
+    const REFRESH_TOKEN = signRefreshJWT({ id: newUser._id }); //refresh token
+
+    // Access token (short lived)
+    res.cookie('AT', ACCESS_TOKEN, {
+        httpOnly: true, //prevent cookie from client-side access via JS
+        maxAge: 15 * 60 * 1000 //15 minutes
+    })
+
+    // Refresh token (expires in 20 days)
+    res.cookie('RT', REFRESH_TOKEN, {
+        httpOnly: true, //prevent cookie from client-side access via JS
+        maxAge: 20 * 24 * 60 * 60 * 1000 //20days
+    })
+
     sendResponse(res, {
         statusCode: 201,
         message: 'The user has been created',
