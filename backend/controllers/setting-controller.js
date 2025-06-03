@@ -2,6 +2,7 @@ import CustomError from "../errors/custom-error-class.js";
 import userModel from "../models/user-model.js";
 import bcrypt from "bcrypt";
 import sendResponse from "../utils/functions/api-response.js";
+import transactionModel from "../models/transaction-model.js";
 
 function wrapper(controller){
     return async (req, res, next) => {
@@ -88,7 +89,56 @@ const logout = wrapper(async (req, res, next) => {
     })
 })
 
+const accountDetails = wrapper(async (req, res, next) => {
+    const userID = req.user._id; //user ID
+
+    // find user details...
+    const userDetails = await userModel.findById(userID);
+
+    // if user not found
+    if(!userDetails){
+        return next(new CustomError({
+            name: 'NotFoundError',
+            message: 'User not found'
+        }))
+    }
+
+    // account details
+    sendResponse(res, {
+        data: userDetails
+    })
+})
+
+const deleteAccount = wrapper(async (req, res, next) => {
+const userID = req.user._id; //user ID
+
+// find user for deletion
+    const deletedUser = await userModel.findByIdAndDelete(userID);
+    
+    // if user not found
+    if(!deletedUser){
+        return next(new CustomError({
+            name: 'NotFoundError',
+            message: 'User not found'
+        }))
+    }
+    
+    // delete all transactions added by user
+    await transactionModel.deleteMany({user: userID})
+
+    // clear all tokens
+    res.clearCookie('AT', {httpOnly: true})
+    res.clearCookie('RT', {httpOnly: true})
+
+    // user is deleted
+    sendResponse(res, {
+        statusCode: 204
+    })
+})
+
 export default {
     changePassword,
-    logout
+    logout,
+    accountDetails,
+    deleteAccount
 }
