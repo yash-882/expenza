@@ -450,7 +450,7 @@ const changePassword = wrapper(async (req, res, next) => {
     if (isPasswordSame) {
         return next(new CustomError({
             message: 'New Password must be different from the previous one'
-        }))
+        }, 400))
     }
 
     // hashing the new Password...
