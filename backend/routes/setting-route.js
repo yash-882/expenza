@@ -1,22 +1,18 @@
 import {Router} from 'express';
 import authController from '../controllers/auth-controller.js';
+import settingController from '../controllers/setting-controller.js';
 const settingRouter = Router()
 
 //middleware for protecting routes 
 settingRouter.use(authController.protect)
-settingRouter.use(authController.protect)
 
+//change password
+settingRouter.route('/change-password')
+.patch(settingController.changePassword)
 
-
-
-// accountSettingRouter.route('/change-email')
-// .patch()
-
-// accountSettingRouter.route('/delete-account')
-// .delete()
-
-// accountSettingRouter.route('/logout')
-// .post()
+// logout account
+settingRouter.route('/logout')
+.get(settingController.logout)
 
 
 export default settingRouter;

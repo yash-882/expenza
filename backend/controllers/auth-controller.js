@@ -459,7 +459,7 @@ const changePassword = wrapper(async (req, res, next) => {
         return next(new CustomError({
             name: 'BadRequestError',
             message: 'New Password must be different from the previous one'
-        }))
+        }, 400))
     }
 
     // hashing the new Password...
