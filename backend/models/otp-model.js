@@ -12,6 +12,12 @@ const OTPSchema = mongoose.Schema({
         trim: true,
         lowercase: true
     },
+    newEmail: {
+        type: String,
+        unique: true,
+        trim: true,
+        lowercase: true
+    },
     requestCount:{
         type:Number,
         default:1,
