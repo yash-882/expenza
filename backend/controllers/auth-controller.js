@@ -148,8 +148,22 @@ const isAlreadyLoggedIn = wrapper((req, res, next) => {
 
 // temporary block OTP request if user exceeded the limit
 const limitOTPRequests = wrapper(async (req, res, next) => {
-    const body = req.body;
+    // for user who are already logged in 
+    const user = req.user
+    if(req.user){
+        const OTPInDB = await OTPModel.findOne({email: user.email})
+        
+        if(OTPInDB && OTPInDB.requestCount >= 5){
+            return next(new CustomError({
+                name: 'TooManyRequests',
+                message: 'Too many OTP requests. Try again later.'
+            }))
+        }
+        req.OTPDetails = OTPInDB
+        return next()
+    }
     
+    const body = req.body;
     // no email is provided
     if (!body || !body.email) {
         return next(new CustomError({
@@ -238,7 +252,23 @@ const resetPassword = wrapper(async (req, res, next) => {
 })
 
 const limitOTPAttempts = wrapper(async (req, res, next) => {
+        //for users who are already logged in
+        
+        if(req.user){
+        const OTPDetails = await OTPModel.findOne({email: req.user.email})
+
+        if(OTPDetails && OTPDetails.attemptCount >= 5){
+        return next(new CustomError({
+            name: 'TooManyRequests',
+            message: 'You have reached the limit for OTP attempts. Try again later.'
+        }, 429))
+        }
+        // allowing user to try attempts again
+        req.OTPDetails = OTPDetails
+        return next()
+    }
     
+    // for users who are not logged in
     // token that allows validation process of an OTP
     const validationToken = req.cookies.OTP_validation
     //throws errors except the expiration error or returns a decoded token
@@ -291,9 +321,10 @@ const validateOTP = wrapper(async (req, res, next) => {
         }, 400))
     }
 
-    // valid OTP
+    // OTP stored in OTP collection in DB
     const hashedValidOTP = req.OTPDetails.otp;
     
+    // email stored in OTP collection in DB
     const userEmail = req.OTPDetails.email;
 
     // entered OTP
