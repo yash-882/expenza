@@ -147,42 +147,11 @@ const isAlreadyLoggedIn = wrapper((req, res, next) => {
 })
 
 // temporary block OTP request if user exceeded the limit
-// (it's just a helper function that avoids DB queries of requestCount in resetPassword,
-//the initiatial block of request happens in resetPassword itself)
 const limitOTPRequests = wrapper(async (req, res, next) => {
-    // token that temporarily block OTP requests 
-    const limitRequestsToken = req.cookies.OTP_requests;
-
-// if user is temporarily blocked from requesting OTPs
-    if (limitRequestsToken) {
-        //throws errors except the expiration error or returns a decoded token
-        const validationResult = verifyAccessJWT(limitRequestsToken)
-
-        // user can request again
-        if (validationResult.name === 'TokenExpiredError') {
-            res.clearCookie('OTP_requests', {httpOnly:true})
-
-            //user can now request again
-            return next()
-        }
-        
-        return next(new CustomError({
-            name: 'TooManyRequests',
-            message: 'Too many OTP requests. Try again later.'
-        }))
-    }
-
-    // first request attempt
-    next()
-})
-
-
-// reset password via OTP
-const resetPassword = wrapper(async (req, res, next) => {
-    const user = req.body;
+    const body = req.body;
     
     // no email is provided
-    if (!user || !user.email) {
+    if (!body || !body.email) {
         return next(new CustomError({
             name: 'BadRequestError',
             message: 'Email is required'
@@ -190,7 +159,7 @@ const resetPassword = wrapper(async (req, res, next) => {
     }
     
     // checks if user is registered 
-    const userInDB = await userModel.findOne({ email: user.email })
+    const userInDB = await userModel.findOne({ email: body.email })
     
     // if doesn't exist
     if (!userInDB) {
@@ -199,60 +168,59 @@ const resetPassword = wrapper(async (req, res, next) => {
             message: "The Email is incorrect or not registered with us"
         }, 404))
     }
-    //generate 6 digits OTP
-    const OTP = Math.floor(Math.random() * 900000) + 100000;
 
-    const isAlreadyRequested = await OTPModel.findOne({ email: user.email })
+    const isAlreadyRequested = await OTPModel.findOne({email: userInDB.email})
     
     if(isAlreadyRequested && isAlreadyRequested.requestCount >= 5){
-
-        // once the user is out of OTP request attempts, we avoid DB queries for requestCount
-        // and assign a token indicates that the OTP validation is not allowed for 5 minutes
-          const requestAttempts = jwt.sign({ type: 'limit-otp-requests' },
-            process.env.JWT_SECKEY_AT,
-            { expiresIn: '5m' })
-
-        // store token
-        res.cookie('OTP_requests', requestAttempts,
-            {httpOnly:true, maxAge: 5 * 60 * 1000 } //5 minutes
-        )
-
         return next(new CustomError({
             name: 'TooManyRequests',
             message: 'Too many OTP requests. Try again later.'
         }))
     }
     
+    // first request attempt
+    req.user = userInDB
+    next()
+})
+
+// reset password via OTP
+const resetPassword = wrapper(async (req, res, next) => {
+    const user = req.user;
+    
+    //generate 6 digits OTP
+    const OTP = Math.floor(Math.random() * 900000) + 100000;
     // hashed password
     const hashedOTP = await bcrypt.hash(String(OTP), 12)
-
+    
     // if user has already requested an OTP
+    const isAlreadyRequested = await OTPModel.findOne({ email: user.email })
+    
     if (isAlreadyRequested) {
         // overwrite the old requested OTP with the new one
-        await OTPModel.updateOne({ email: userInDB.email },
+        await OTPModel.updateOne({ email: user.email },
             {
                 '$set': { otp: hashedOTP },
                 '$inc': { requestCount: 1 }
             })
             
             // sending OTP...
-            await sendOTP(OTP, userInDB.email)
+            await sendOTP(OTP, user.email)
         }
         
         // 1st request of requesting OTP
         else {
             // store OTP in DB
             await OTPModel.create({ 
-                email: userInDB.email, 
+                email: user.email, 
                 otp: hashedOTP,
             })
             // sending OTP... 
-            await sendOTP(OTP, userInDB.email)
+            await sendOTP(OTP, user.email)
         }
         
         // sign token to identify email
         const token = jwt.sign({
-            email: userInDB.email,
+            email: user.email,
             type: 'email-identifier'
         }, process.env.JWT_SECKEY_AT,
         { expiresIn: '10m' })
@@ -285,26 +253,6 @@ const limitOTPAttempts = wrapper(async (req, res, next) => {
         }, 404))
     }
     
- 
-    // check if user is temporarily blocked from OTP validation
-    const limitAttemptsToken = req.cookies.OTP_Attempts;
-
-    if(limitAttemptsToken){
-       const attemptsResult = verifyAccessJWT(limitAttemptsToken)
-
-    //    if expired.. means user can now make attemps again
-       if(attemptsResult.name === 'TokenExpiredError'){
-        // allow user to try atempts again
-        res.clearCookie('OTP_Attempts', {httpOnly: true})
-       } 
-    //    user is still not allowed to the validation process
-       else{ 
-        return next(new CustomError({
-            name: 'TooManyRequests',
-            message: 'You have reached the limit for OTP attempts. Try again later.'
-        }, 429))
-       }
-}
 
     // querying to check the expiration
     const OTPInDB = await OTPModel.findOne({ email: validationResult.email })
@@ -320,18 +268,6 @@ const limitOTPAttempts = wrapper(async (req, res, next) => {
 
     // user is out of attempts
     if (OTPInDB && OTPInDB.attemptCount >= 5) {
-        // once the user is out of attempts, we avoid DB queries for attemptCount
-        // and assign a token indicates that the OTP validation is not allowed for 5 minutes
-        const OTPAttempts = jwt.sign({type:'limit-otp-attempts'}, 
-            process.env.JWT_SECKEY_AT,
-            {expiresIn: '5m'}
-        )
-
-        // store token
-        res.cookie('OTP_Attempts', OTPAttempts, 
-            {httpOnly: true},
-            {maxAge: 5 * 60 * 1000 } //5 minutes
-        )
 
         return next(new CustomError({
             name: 'TooManyRequests',
@@ -357,7 +293,6 @@ const validateOTP = wrapper(async (req, res, next) => {
 
     // valid OTP
     const hashedValidOTP = req.OTPDetails.otp;
-    console.log(hashedValidOTP);
     
     const userEmail = req.OTPDetails.email;
 
@@ -472,8 +407,6 @@ const changePassword = wrapper(async (req, res, next) => {
     // clear tokens after updation
     res.clearCookie('OTP_validation', { httpOnly: true })
     res.clearCookie('change_password', { httpOnly: true })
-    res.clearCookie('OTP_Attempts', { httpOnly: true })
-    res.clearCookie('OTP_requests', { httpOnly: true })
 
     // Delete OTP document after updation...
     await OTPModel.deleteOne({ email: validationResult.email })
