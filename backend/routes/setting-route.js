@@ -1,6 +1,7 @@
 import {Router} from 'express';
 import authController from '../controllers/auth-controller.js';
 import settingController from '../controllers/setting-controller.js';
+import transactionController from '../controllers/transaction-controller.js';
 const settingRouter = Router()
 
 //middleware for protecting routes 
@@ -30,5 +31,8 @@ settingRouter.route('/account-details')
 settingRouter.route('/delete-account')
 .delete(settingController.deleteAccount)
 
+// clear all transactions
+settingRouter.route('/clear-all-transactions')
+.delete(transactionController.deleteTransactions)
 
 export default settingRouter;
