@@ -10,6 +10,14 @@ settingRouter.use(authController.protect)
 settingRouter.route('/change-password')
 .patch(settingController.changePassword)
 
+//verify email
+settingRouter.route('/verify-email')
+.post(authController.limitOTPRequests, settingController.verifyNewEmail)
+
+//validate and change email
+settingRouter.route('/change-email')
+.patch(authController.limitOTPAttempts, settingController.changeEmail)
+
 // logout account
 settingRouter.route('/logout')
 .get(settingController.logout)
