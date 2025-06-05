@@ -32,8 +32,18 @@ const userSchema = mongoose.Schema({
         type: Date,
         default: new Date()
     },
-    lastUpdated: Date
-    
+    lastUpdated: Date,
+
+    budget: {
+        createdAt: {
+            type: Date,
+            default: null
+        },
+        monthlyBudget: {
+            type: Number,
+            default:0
+        }
+    }
 })
 
 userSchema.pre('save', async function (next) {
@@ -56,3 +66,9 @@ userSchema.pre('save', async function (next) {
 const userModel = mongoose.model('users', userSchema)
 
 export default userModel
+
+const budget = {
+    createdAt: null,
+    monthlyBudget: 3878
+
+}
