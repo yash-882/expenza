@@ -254,6 +254,68 @@ const changeEmail = wrapper(async (req, res, next) => {
     })
 })
 
+// set monthly budget
+const setBudget = wrapper(async(req, res, next) => {
+    const userID = req.user._id; //user ID
+    const body = req.body; //body
+
+    // if budget is not provided
+    if(!body || !body.budget){
+        return next(new CustomError({
+            name: 'BadRequestError',
+            message: 'Please enter Budget value'
+        }, 400))
+    }
+
+    // set budget...
+    const user = await userModel.findByIdAndUpdate(userID, 
+        {"$set": {
+                "budget.createdAt": Date.now(),
+                "budget.monthlyBudget": Number(body.budget)
+            }
+        }, {runValidators: true, new: true})
+
+        // user not found 
+        if(!user){
+            return next(new CustomError({
+            name: 'NotFoundError',
+            message: 'User not found'
+        }, 404))
+        }
+
+        // budget set
+        sendResponse(res, {
+            message: 'Budget has been set',
+            data: user.budget
+        })
+})
+
+
+const clearBudget = wrapper(async(req, res, next) => {
+    const userID = req.user._id; //user ID
+
+    // delete budget(nested doc)
+     const user = await userModel.findByIdAndUpdate(userID, 
+        {"$set": {
+                "budget.createdAt": null,
+                "budget.monthlyBudget": 0
+            }
+        }, {runValidators: true, new: true})
+
+        // user not found 
+        if(!user){
+            return next(new CustomError({
+            name: 'NotFoundError',
+            message: 'User not found'
+        }, 404))
+    }
+
+        // budget deleted
+        sendResponse(res, {
+            message: 'Budget deleted',
+            data: user.budget
+        })
+})
 
 export default {
     changePassword,
@@ -261,5 +323,7 @@ export default {
     accountDetails,
     deleteAccount,
     verifyNewEmail,
-    changeEmail
+    changeEmail,
+    setBudget,
+    clearBudget
 }
