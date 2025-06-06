@@ -4,9 +4,6 @@ import settingController from '../controllers/setting-controller.js';
 import transactionController from '../controllers/transaction-controller.js';
 const settingRouter = Router()
 
-//middleware for protecting routes 
-settingRouter.use(authController.protect)
-
 //change password
 settingRouter.route('/change-password')
 .patch(settingController.changePassword)
