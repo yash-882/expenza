@@ -36,8 +36,5 @@ settingRouter.route('/clear-all-transactions')
 settingRouter.route('/set-budget')
 .patch(settingController.setBudget)
 
-// clear budget (updates nested document of 'Users' collection)
-settingRouter.route('/clear-budget')
-.patch(settingController.clearBudget)
 
 export default settingRouter;
