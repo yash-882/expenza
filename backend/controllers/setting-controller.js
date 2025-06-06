@@ -5,6 +5,7 @@ import sendResponse from "../utils/functions/api-response.js";
 import transactionModel from "../models/transaction-model.js";
 import nodemailer from "../utils/functions/nodemailer/nodemailer.js";
 import OTPModel from "../models/otp-model.js";
+import {differenceInMilliseconds} from 'date-fns'
 
 function wrapper(controller) {
     return async (req, res, next) => {
@@ -299,32 +300,45 @@ const setBudget = wrapper(async(req, res, next) => {
         })
 })
 
+//automatically reset budget after 1 month or can also reset manually if requested
+const resetBudget = wrapper(async(req, res, next) => {
+    const user = req.user; //user 
 
-const clearBudget = wrapper(async(req, res, next) => {
-    const userID = req.user._id; //user ID
-
-    // delete budget(nested doc)
-     const user = await userModel.findByIdAndUpdate(userID, 
-        {"$set": {
-                "budget.createdAt": null,
-                "budget.monthlyBudget": 0
+    // check if the action is manually requested by the client
+    let manuallyRequested = req.path === '/api/user/setting/clear-budget'
+    
+    // checks if the budget is set 
+    const monthlyBudget = user.budget?.monthlyBudget;
+    
+    if(!monthlyBudget && !manuallyRequested)
+        return next(); //skip because the user has not set a budget
+    
+    // calculate the difference b/w the current time and the budget creation time
+    const diff = differenceInMilliseconds(new Date(), new Date(user.budget.createdAt));
+    const thirtyDays = 30 * 24 * 60 * 60 * 1000; // 30 days in ms
+    
+    
+    let updatedUser;
+    
+    // compare if the days differnce after setting budget is greater than or equal to 30 days
+    if(diff >= thirtyDays || manuallyRequested){
+        updatedUser = await userModel.findByIdAndUpdate(user._id, {
+            "$set": {
+                "budget.monthlyBudget": 0,
+                "budget.createdAt": null
             }
-        }, {runValidators: true, new: true})
-
-        // user not found 
-        if(!user){
-            return next(new CustomError({
-            name: 'NotFoundError',
-            message: 'User not found'
-        }, 404))
+        }, {new: true})
     }
-
-        // budget deleted
-        sendResponse(res, {
-            message: 'Budget deleted',
-            data: user.budget
-        })
+    
+    if(manuallyRequested) {
+    // sending response...
+    return sendResponse(res, {
+       data: updatedUser.budget
+    })
+    }
+    next()
 })
+
 
 export default {
     changePassword,
@@ -334,5 +348,5 @@ export default {
     verifyNewEmail,
     changeEmail,
     setBudget,
-    clearBudget
+    resetBudget
 }
