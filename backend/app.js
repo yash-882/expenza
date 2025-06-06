@@ -1,6 +1,6 @@
 import express from 'express';
 
-// custom modules
+// global error handler
 import GlobalErrorHandler from './errors/global-err-handler.js';
 
 // routers
@@ -8,9 +8,13 @@ import authRouter from './routes/auth-route.js';
 import transactionRouter from './routes/transaction-route.js';
 import settingRouter from './routes/setting-route.js';
 
+// controllers
+import authController from './controllers/auth-controller.js';
+
 // third-party packages
 import cookieParser from 'cookie-parser';
 import qs from 'qs';
+
 // app
 const app = express();
 
@@ -28,6 +32,10 @@ app.use(cookieParser())
 
 // authentication route(sign-up, login, change password, etc)
 app.use('/api/auth', authRouter);
+
+// middleware for protecting routes defined below
+app.use(authController.protect)
+
 app.use('/api/transaction', transactionRouter);
 app.use('/api/user/setting', settingRouter);
 
