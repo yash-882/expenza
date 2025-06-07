@@ -31,6 +31,21 @@ app.use(cookieParser())
     return qs.parse(queryString)
 })
 
+// trim URL
+app.use((req, res, next) => {
+  // trimming 
+  try{
+    // can throw error on malformed url (when it includes invalid '%' encoding, like ..%iihe)
+    let url = decodeURIComponent(req.url).trim()
+    req.url = url
+  } catch(err){
+    return res.status(400).json({status: 'fail', message: err.message})
+  }
+
+  next()
+  
+})
+
 // authentication route(sign-up, login, change password, etc)
 app.use('/api/auth', authRouter);
 
@@ -42,6 +57,14 @@ app.use(settingController.resetBudget)
 
 app.use('/api/transaction', transactionRouter);
 app.use('/api/user/setting', settingRouter);
+
+// Middleware executes when the URL path is not found
+app.use((req, res, next) => {
+  return res.status(404).json({
+    status: 'fail',
+    message: 'Requested Page is not found'
+  }) 
+})
 
 // global error handler
 app.use(GlobalErrorHandler)
