@@ -36,5 +36,9 @@ settingRouter.route('/clear-all-transactions')
 settingRouter.route('/set-budget')
 .patch(settingController.setBudget)
 
+// change name
+settingRouter.route('/change-name')
+.patch(settingController.changeName)
+
 
 export default settingRouter;
