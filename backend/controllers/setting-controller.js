@@ -359,6 +359,61 @@ const changeName = wrapper(async(req, res, next) => {
     })
 })
 
+// checks if the limit of transactions have exceeded or not
+const transactionStatus = wrapper(async(req, res, next) => {
+    const user = req.user; //user
+
+    // user's monthly budget 
+    const monthlyBudget = user.budget?.monthlyBudget;
+
+    // if budget is not set, we don't need to 
+    if(!monthlyBudget)
+        return next();
+
+    // it returns result inside array as an obj , extracting that obj...
+    const [result] = await transactionModel.aggregate([
+        {"$match": {user: user._id}}, //user's transactions
+
+        {
+        //multiple pipelines
+        "$facet":{
+            // pipeline 1: group documents by categories and calculates sum of amounts of each one
+            eachCategory: [
+                {"$group": {_id: "$category", total:{"$sum": "$amount"}}},
+                {"$sort": {total: -1}} //sorting in descending
+            ],
+
+            // pipeline 2: calculate total sum of all transactions(including all categories)
+            totalTransactions: [
+                 {"$group": {_id: null, total:{"$sum": "$amount"}}},
+            ]
+        },
+}])
+
+
+//if not docs were found, mongoose won't include computed fields(like sum, etc) 
+// that were added while grouping docs 
+
+// total amount of all transactions
+    const {total: totalTransactions} = result.totalTransactions[0] || {total: 0}; 
+
+    // array of documents, each doc contains a unique category and its sum of total amount
+    const eachCategoryTotal = result.eachCategory;
+
+    // check if the limit is exceeded
+    const isExceeded = totalTransactions > monthlyBudget;
+    
+        // transaction status
+        return sendResponse(res, {
+            message: isExceeded? 'Transaction limit exceeded' : 'Limit is available',
+            data: {
+                totalTransactions,
+                eachCategoryTotal
+            }
+        })
+
+})
+
 export default {
     changePassword,
     logout,
@@ -368,5 +423,6 @@ export default {
     changeEmail,
     setBudget,
     resetBudget,
-    changeName
+    changeName,
+    transactionStatus
 }
