@@ -368,6 +368,73 @@ const changeName = wrapper(async(req, res, next) => {
     })
 })
 
+// returns transaction status of current month 
+// (also returns a detailed overview)
+const transactionStatus = wrapper(async(req, res, next) => {
+    const user = req.user; //user
+
+    // user's monthly budget 
+    const monthlyBudget = user.budget?.monthlyBudget;
+
+    // it returns result inside array as an obj , extracting that obj...
+    const [result] = await transactionModel.aggregate([
+        // find transactions that were added after the user's latest budget was created
+        {"$match": {user: user._id, createdAt: {'$gt': monthlyBudget }} }, //user's transactions
+
+        {
+        //multiple pipelines
+        "$facet":{
+            // pipeline 1: group documents by categories and calculates sum of amounts of each one
+            eachCategory: [
+                {"$group": {_id: "$category", type: {"$first": "$type"}, totalAmount:{"$sum": "$amount"}}},
+                {"$sort": {totalAmount: -1}} //sorting in descending
+            ],
+
+            // pipeline 2: calculate total amount of Expense and Income separately 
+            transactionTypes: [
+                 {"$group": {_id: "$type", totalAmount:{"$sum": "$amount"}}},
+            ]
+        },
+}])
+
+
+//if no docs were found, mongoose won't include computed fields(like ExpenseAndIncome) 
+// that were added while grouping docs 
+    let transactionTypes = result.transactionTypes
+
+    // default amount if no transactions were found
+    if(!transactionTypes.length)
+        transactionTypes = [{_id: 'income', totalAmount: 0} , {_id: 'expense', totalAmount: 0}]
+
+    let totalIncome; //total income
+    let totalExpense; //total expense
+
+    // extracting amounts of Income and Expense
+    transactionTypes.forEach(type => {
+        
+        if(type._id == 'income')
+            totalIncome = type.totalAmount
+
+        else
+            totalExpense = type.totalAmount    
+    })
+    
+
+    // array of documents, each doc contains a unique category and its sum of total amount
+    const eachCategoryTotal = result.eachCategory;
+    
+        // transaction status
+        return sendResponse(res, {
+            data: {
+                isLimitExceeded:  totalExpense > monthlyBudget,
+                totalExpense,
+                totalIncome,
+                eachCategoryTotal
+            }
+        })
+
+})
+
 export default {
     changePassword,
     logout,
@@ -377,5 +444,6 @@ export default {
     changeEmail,
     setBudget,
     resetBudget,
-    changeName
+    changeName,
+    transactionStatus
 }
