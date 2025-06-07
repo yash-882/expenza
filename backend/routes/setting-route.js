@@ -40,5 +40,9 @@ settingRouter.route('/set-budget')
 settingRouter.route('/change-name')
 .patch(settingController.changeName)
 
+// view transaction status
+settingRouter.route('/transaction-status')
+.get(settingController.transactionStatus)
+
 
 export default settingRouter;
