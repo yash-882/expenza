@@ -245,13 +245,14 @@ const changeEmail = wrapper(async (req, res, next) => {
 
     // For valid OTP
     // updating email...
-    await userModel.findByIdAndUpdate(user._id, { email: OTPInDB.newEmail }, { runValidators: true })
+   const userInDB = await userModel.findByIdAndUpdate(user._id, { email: OTPInDB.newEmail }, { runValidators: true, new: true })
     // deleting OTP 
     await OTPInDB.deleteOne(user.newEmail);
 
     // updated
     sendResponse(res, {
-        message: 'Email updated succesfully'
+        message: 'Email updated succesfully',
+        data : userInDB.email
     })
 })
 
@@ -339,6 +340,33 @@ const resetBudget = wrapper(async(req, res, next) => {
     next()
 })
 
+// change name
+const changeName = wrapper(async(req, res, next) => {
+    const user = req.user; //user
+    const body = req.body
+    // if budget is not provided
+    if(!body || !body.newName){
+        return next(new CustomError({
+            name: 'BadRequestError',
+            message: 'Please enter Name'
+        }, 400))
+    }
+    if(user.name === body.newName){
+         return next(new CustomError({
+            name: 'BadRequestError',
+            message: 'Please enter a new Name'
+        }, 400))
+    }
+
+     // updating email...
+    const userInDB = await userModel.findByIdAndUpdate(user._id, { name: body.newName }, { runValidators: true, new: true })
+
+
+    sendResponse(res, {
+        message: 'Name updated successfully',
+        data: userInDB.name
+    })
+})
 
 export default {
     changePassword,
@@ -348,5 +376,6 @@ export default {
     verifyNewEmail,
     changeEmail,
     setBudget,
-    resetBudget
+    resetBudget,
+    changeName
 }
