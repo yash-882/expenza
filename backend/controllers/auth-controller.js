@@ -149,31 +149,19 @@ const isAlreadyLoggedIn = wrapper((req, res, next) => {
 // temporary block OTP request if user exceeded the limit
 const limitOTPRequests = wrapper(async (req, res, next) => {
     // for user who are already logged in 
-    const user = req.user
-    if(req.user){
-        const OTPInDB = await OTPModel.findOne({email: user.email})
-        
-        if(OTPInDB && OTPInDB.requestCount >= 5){
-            return next(new CustomError({
-                name: 'TooManyRequests',
-                message: 'Too many OTP requests. Try again later.'
-            }))
-        }
-        req.OTPDetails = OTPInDB
-        return next()
-    }
-    
+    const user = req.user //user is logged in?
     const body = req.body;
-    // no email is provided
-    if (!body || !body.email) {
+
+    // if user is not logged in and email is undefined
+        if ((!body || !body.email) && !user) {
         return next(new CustomError({
             name: 'BadRequestError',
             message: 'Email is required'
-        }), 400)
+        }, 400))
     }
-    
-    // checks if user is registered 
-    const userInDB = await userModel.findOne({ email: body.email })
+
+        //lookup DB for user if not already logged in
+    const userInDB = !user ? await userModel.findOne({ email: body.email }) : user;
     
     // if doesn't exist
     if (!userInDB) {
@@ -183,18 +171,22 @@ const limitOTPRequests = wrapper(async (req, res, next) => {
         }, 404))
     }
 
-    const isAlreadyRequested = await OTPModel.findOne({email: userInDB.email})
-    
-    if(isAlreadyRequested && isAlreadyRequested.requestCount >= 5){
-        return next(new CustomError({
-            name: 'TooManyRequests',
-            message: 'Too many OTP requests. Try again later.'
-        }))
-    }
-    
-    // first request attempt
-    req.user = userInDB
-    next()
+    // find OTP
+    const OTPInDB = await OTPModel.findOne({email: userInDB.email})
+
+    // if request attempts exceeded the limit
+        if(OTPInDB && OTPInDB.requestCount >= 5){
+            return next(new CustomError({
+                name: 'TooManyRequests',
+                message: 'Too many OTP requests. Try again later.'
+            }, 429))
+        }
+
+        //OTP details
+        req.OTPDetails = OTPInDB
+        // user
+        req.user = userInDB
+        next()
 })
 
 // reset password via OTP
@@ -216,9 +208,6 @@ const resetPassword = wrapper(async (req, res, next) => {
                 '$set': { otp: hashedOTP },
                 '$inc': { requestCount: 1 }
             })
-            
-            // sending OTP...
-            await sendOTP(OTP, user.email)
         }
         
         // 1st request of requesting OTP
@@ -228,9 +217,10 @@ const resetPassword = wrapper(async (req, res, next) => {
                 email: user.email, 
                 otp: hashedOTP,
             })
-            // sending OTP... 
-            await sendOTP(OTP, user.email)
         }
+
+        // sending OTP... 
+        await sendOTP(OTP, user.email)
         
         // sign token to identify email
         const token = jwt.sign({
