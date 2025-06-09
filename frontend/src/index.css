@@ -1,0 +1,16 @@
+@font-face{
+  font-family:"google custom font";
+  src: url("./assets/fonts/Mulish-VariableFont_wght.ttf") format("truetype");
+}
+*{
+  margin: 0;         /* Remove default margins */
+  padding: 0;        /* Remove default padding */
+  box-sizing: border-box; /* Ensures padding & border don't affect width */
+  font-family: "google custom font", sans-serif; /* Apply default font */
+  -webkit-tap-highlight-color: transparent;
+} 
+button{
+  cursor: pointer;
+}
+
+
