@@ -15,9 +15,15 @@ import settingController from './controllers/setting-controller.js';
 // third-party packages
 import cookieParser from 'cookie-parser';
 import qs from 'qs';
+import cors from 'cors'
 
 // app
 const app = express();
+
+// allow requests from frontend
+app.use(cors({
+    origin: 'http://localhost:5173/'
+}))
 
 // parse json data
 app.use(express.json())
