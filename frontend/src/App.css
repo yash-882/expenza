@@ -1,0 +1,48 @@
+/* Nav link */
+.nav-link-css {
+  font-weight: 750;
+  color: white;
+  background-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease-in-out;
+  border-radius: 0.5rem;
+}
+
+/* Hover style */
+.nav-link-css:hover {
+  background-color:  #cfd8e4 !important;
+  color: #000 !important;
+  text-decoration: none !important;
+}
+
+/* Active link */
+.link-active {
+  background-color: #cfcfe4;
+  color: #000 !important;
+  font-weight: 700;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.4);
+}
+
+body{
+  background-color: rgb(17, 17, 17);
+}
+
+.nav-link-css:hover{
+  color: gray;
+}
+
+/* Small devices */
+@media (max-width: 768px){
+  .nav-link-css{
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 432px){
+  .nav-link-css p{
+    display: none;
+  }
+}
+
+
+
