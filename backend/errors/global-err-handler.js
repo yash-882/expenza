@@ -11,26 +11,12 @@ const OPERATIONAL_ERRORS= new Map([
 ])
 
 // development errors
-const devErrors = (err, res) => {
-     // double check.. if the error is thrown by a framework then 
-    // we look up in StatusCode map ,if not found then its a SERVER ERROR
-    let statusCode = err.statusCode || OPERATIONAL_ERRORS.get(err.name) || 500;
-    const errName = err.name || 'InternalServerError';
-
-    // mark it as operational if not a server error
-    if(statusCode != 500){
-        err.isOperational = true;
-    }
-
-    // check for mongoDB duplication error
-    if(err.code == 11000 && err.name == 'MongoServerError'){
-        statusCode = OPERATIONAL_ERRORS.get(err.code)
-    }
+const devResponse = (err, res) => {
 
     // return err response
-    return res.status(statusCode).json({
+    return res.status(err.statusCode).json({
         status: 'fail',
-        name: errName,
+        name: err.name,
         message: err.message,
         stack: err.stackTrace || err.stack, //may come from native JS or manually by CustomError class
         err: err,
@@ -42,23 +28,40 @@ const devErrors = (err, res) => {
 const GlobalErrorHandler = (err, req, res, next) => {
     console.log('Error:', err);
 
+         // double check.. if the error is thrown by a framework then 
+    // we look up in StatusCode map ,if not found then its a SERVER ERROR
+    let statusCode = err.statusCode || OPERATIONAL_ERRORS.get(err.name) || 500;
+    const name = err.name || 'InternalServerError';
+    const message = err.message || 'Something went wrong! please try again later'
+
+    // mark it as operational if not a server error
+    const isOperational = err.statusCode !== 500
+
+    // check for mongoDB duplication error
+    if(err.code == 11000 && err.name == 'MongoServerError'){
+        statusCode = OPERATIONAL_ERRORS.get(err.code)
+    }
+
+    const error = { 
+        ...err, 
+        statusCode, 
+        name, 
+        message,
+        isOperational,
+        stackTrace: err.stackTrace || err.stack, //may come from native JS or manually by CustomError class
+    }
+
     // development mode
     if (process.env.NODE_ENV == 'development')
-        return devErrors(err, res)
+        return devResponse(error, res)
     
     // production mode
     else if (process.env.NODE_ENV == 'production') {
-        // error details
-        const message = err.message || "Something went wrong! please try again later."
-        const statusCode = err.statusCode || 500
-
-        return res.status(statusCode || 500).json({
+        return res.status(statusCode).json({
             status: 'fail',
             message
         })
     }
-    //simply return the response in production
-    res.status(err.statusCode || 500).json({ status: 'fail', message })
 }
 
 export default GlobalErrorHandler
