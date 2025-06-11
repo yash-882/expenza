@@ -15,9 +15,16 @@ import settingController from './controllers/setting-controller.js';
 // third-party packages
 import cookieParser from 'cookie-parser';
 import qs from 'qs';
+import cors from 'cors';
 
 // app
 const app = express();
+
+// allows API access only to specified domains
+app.use(cors({
+  origin: process.env.FRONTEND_DOMAIN, //only allow requests to thisspecific domain
+  credentials: true //allows browsers to send credentials(cookie, auth headers, etc) in cross-origin requests
+}))
 
 // parse json data
 app.use(express.json())
