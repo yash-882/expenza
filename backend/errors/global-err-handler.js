@@ -1,3 +1,5 @@
+import { prodErrMessages } from "./production-error-messages.js"
+
 // errors by frameworks like mongoose, jwt etc don't include isOperational property
 // even if they are considered as operational
 // OPERATIONAL_ERRORS helps identifying those errors 
@@ -52,14 +54,19 @@ const GlobalErrorHandler = (err, req, res, next) => {
     }
 
     // development mode
-    if (process.env.NODE_ENV == 'development')
+    if (process.env.NODE_ENV === 'development')
         return devResponse(error, res)
     
     // production mode
-    else if (process.env.NODE_ENV == 'production') {
+    else if (process.env.NODE_ENV === 'production') {
+        
+        const getProdErrMessage = prodErrMessages[name] || prodErrMessages[error.code];
+
+        const prodMsg = getProdErrMessage ? getProdErrMessage(error) : 'Something went wrong!'
+
         return res.status(statusCode).json({
             status: 'fail',
-            message
+            message:  prodMsg 
         })
     }
 }
