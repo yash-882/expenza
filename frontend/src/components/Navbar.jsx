@@ -1,17 +1,24 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {Link} from "react-router-dom"
 import { NavLinks } from '@constants/nav-bar/links.js';
 import ExpenzaLogo from "@assets/images/EXPENZA-LOGO.png"
 
-function Navbar() {
+function Navbar({setNavbarRef}) {
 
 let [activeTab, setActiveTab] = useState('/')
+let navbarRef = useRef(null)
 
+useEffect(() => {
 
+  // sharing Navbar's ref to Parent
+  setNavbarRef(navbarRef);
+
+}, [])
 
   return (
     // Navbar
-    <div className="container-fluid custom-navbar position-fixed py-1">
+    <div className="container-fluid custom-navbar position-fixed py-1" 
+    ref={navbarRef}>
         {/* Nav links */}
             <div className="d-flex align-items-center justify-content-evenly" id="navbarContent">
 
