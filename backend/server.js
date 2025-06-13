@@ -1,8 +1,7 @@
-dotenv.config({path:'./configs/file.env'})
+import './configs/load-env.js';
 
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
 import app from './app.js'
+import mongoose from 'mongoose';
 
 mongoose.connect(process.env.CONN_STR)
 .then(()=> console.log('Connected to Expense Tracker DB'))
