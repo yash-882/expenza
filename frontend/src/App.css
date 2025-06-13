@@ -28,9 +28,10 @@
 
 body{
   background-color: #f5f5f5; 
-  height: 200vh;
 }
 /* TRANSACTIONS */
+
+/* options for transactions sorting and filtering */
 .customize-transactions-options button{
   background-color: #c8c8c8	;
   box-shadow: 0px 0px 3px #161616;
@@ -44,6 +45,41 @@ body{
 .customize-transactions-options button:hover{
    background-color: #949494;
 }
+
+/* transaction type(salary or expense) */
+.transaction-type{
+  font-size: 15px;
+}
+
+/* transaction card (contains details of transaction) */
+ .transaction-card{
+   color: white;
+   background-color: #171922;
+   border-radius: 16px;
+}
+
+/* transaction card options */
+.transaction-card-options{
+  font-size: 14px;
+  color: rgb(178, 178, 255) !important;
+}
+
+/* transaction date added */
+.transaction-date{
+  font-size: 14px;
+}
+
+/* transaction category */
+.transaction-category{
+  font-size: 18px;
+}
+
+/* transaction description */
+.transaction-description{
+  font-size: 15px;
+  color: rgb(217, 217, 217);
+}
+
 
 /* Mobile and Tablet devices */
 @media (max-width: 768px){
@@ -72,6 +108,36 @@ body{
     /* transaction options(sort, filter, etc) */
   .customize-transactions-options p{
     font-size: 13px;
+}
+
+/* transaction type(salary or expense) */
+.transaction-type{
+  font-size: 14px;
+}
+/* transaction category */
+.transaction-category{
+  font-size: 16px;
+}
+
+/* transaction card options */
+.transaction-card-opt{
+  font-size: 14px;
+  color: rgb(178, 178, 255) !important;
+}
+
+/* transaction date added */
+.transaction-date{
+  font-size: 14px;
+}
+
+/* transaction description */
+.transaction-description{
+  font-size: 14px;
+  color: rgb(217, 217, 217);
+}
+/* transaction heading */
+.transaction-card-heading{
+font-size: 14px;
 }
 
 }
@@ -115,5 +181,9 @@ body{
 }
 .transactions-options-icon{
   margin-right: 0px !important;
+}
+/* transaction heading */
+.transaction-card-heading{
+font-size: 12px;
 }
 }
