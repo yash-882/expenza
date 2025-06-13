@@ -1,16 +1,12 @@
 import express from 'express';
 
-// global error handler
+// custom modules
 import GlobalErrorHandler from './errors/global-err-handler.js';
 
 // routers
 import authRouter from './routes/auth-route.js';
 import transactionRouter from './routes/transaction-route.js';
 import settingRouter from './routes/setting-route.js';
-
-// controllers
-import authController from './controllers/auth-controller.js';
-import settingController from './controllers/setting-controller.js';
 
 // third-party packages
 import cookieParser from 'cookie-parser';
@@ -56,13 +52,10 @@ app.use((req, res, next) => {
 // authentication route(sign-up, login, change password, etc)
 app.use('/api/auth', authRouter);
 
-// middleware for protecting routes defined below
-app.use(authController.protect)
-
-//checks if 30 days have passed since the budget was set
-app.use(settingController.resetBudget)
-
+// transaction router (CRUD)
 app.use('/api/transaction', transactionRouter);
+
+// setting router(change password, change-email, reset budget, etc)
 app.use('/api/user/setting', settingRouter);
 
 // Middleware executes when the URL path is not found
