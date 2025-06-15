@@ -1,25 +1,32 @@
 import React from 'react'
 import PopupWrapper from '../PopupWrapper';
+import { useEffect } from 'react';
+import axios from 'axios';
 
 
 function TransactionOverview({hidePopup}) {
-  
-  // temporary data sample
-  const categories = ['food','transport','housing','entertainment','healthcare',
-              'education','others', 'income', 'freelance', 'bonus']
 
-  const [amounts, setAmounts] = React.useState({
-    food: 0,
-    transport: 0,
-    housing: 0,
-    entertainment: 0,
-    healthcare: 0,
-    education: 0,
-    others: 0,
-    income: 0,
-    freelance: 0,
-    bonus: 0
-  });
+  const [overview, setOverview] = React.useState({});
+
+  async function fetchTransactionOverview(){
+
+    // fetching API...
+    const result = await axios.get('http://localhost:8000/api/user/setting/transaction-status', {
+      withCredentials: true //set credentials
+    })
+
+    // API response
+    const apiResponse = result.data
+
+    // set data of transaction overview
+    setOverview(apiResponse.data)
+  }
+  console.log(overview);
+  
+  useEffect(()=> {
+    // fetching data...
+    fetchTransactionOverview()
+  }, [])
 
   return (
     <PopupWrapper>
@@ -44,13 +51,17 @@ function TransactionOverview({hidePopup}) {
 
           {/* income and expense total amount */}
          <p>
-           Expense: 300 | Income: 400
+           Expense: <span className='fw-bold'> ₹{overview.totalExpense} </span> | 
+           Income: <span className='fw-bold'> ₹{overview.totalIncome} </span>
          </p>
           
          {/* show transaction status if user has set monthly budget  */}
           {
-         1 ?  <span className=' text-black'>
-          Status: <span className='text-danger'>Limit exceeded!</span>
+         overview.isBudgetSet ?  <span className='text-black'>
+          Status: <span 
+          className={overview.isLimitExceeded ? 'text-danger': 'text-success'}>
+            { overview.isLimitExceeded ? 'Spending Limit exceeded!': 'Spending Limit available' }
+          </span>
           </span> : ''
            } 
            
@@ -62,15 +73,20 @@ function TransactionOverview({hidePopup}) {
       <div className="category-list mt-3">
 
         {/* each category */}
-        {categories.map((category, index) => (
+        {overview?.eachCategoryTotal?.length ? (overview.eachCategoryTotal.map((category, index) => (
           <div key={index} className="d-flex  justify-content-between text-black mb-2">
             {/* category */}
-            <span className="text-capitalize">{category}</span>
+            <span className="text-capitalize">{category._id}</span>
 
             {/* amount */}
-            <span className='text-danger fw-bold'>${amounts[category]}</span>
+            <span 
+            className={`${category.type === 'expense' ? 'text-danger':'text-success'} fw-bold`}>
+
+      {category.type === 'expense' ? '-₹'+category.totalAmount: '+₹'+category.totalAmount}
+              
+              </span>
           </div>
-        ))}
+        ))) : ('No transactions found this month')}
       </div>
 
       </div>
