@@ -9,11 +9,16 @@
         let [transactionData, setTransactionData] = useState([])
         let [message, setMessage] = useState('');
         let [overviewPopup, setOverviewPopup] = useState(false)
+        let [sortOrder, setSortOrder] = useState({
+          descending: true,
+          ascending: false
+        })
     
         // fetch transactions
-        async function fetchTransactions(){
+        async function fetchTransactions(params){
+          const setParams = params ? params : '';
                // getting response...
-         const response = await axios.get('http://localhost:8000/api/transaction', 
+              const response = await axios.get(`http://localhost:8000/api/transaction?${setParams}`, 
             { withCredentials: true }) //sends the request including (cookies, headers)
     
         // api response(contains data, dataLength requestTime)
@@ -31,6 +36,29 @@
             // fetch transactions...
             fetchTransactions()
           }, [])
+
+
+          async function sortTransactionOrder(){
+            let params = ''; //will contain a field as a part of query string for sorting
+
+            //sort order is applied in ascending
+            if(sortOrder.ascending)
+              params = 'sort=createdAt'
+
+            //sort order is applied descending
+            else if(sortOrder.descending){
+              params = 'sort=-createdAt'
+            }
+
+            // fetch transactions...
+            fetchTransactions(params)
+          }
+
+          useEffect(()=> {
+            // sort order of transactions...
+            sortTransactionOrder()
+
+          }, [sortOrder.ascending, sortOrder.descending])
           
           return (
             <>
@@ -48,13 +76,41 @@
                       <Settings2Icon color='blue' className='me-2 transactions-options-icon'/>  
                       <p className='mb-0'>Filters</p>
                       </button>
-    
-                            {/* Sort transactions by date*/}
-                    <button className='rounded-4  d-flex align-items-center '>
+
+
+                <div className="dropdown">
+                    {/* Sort transactions by date*/}
+                    <button 
+                    className='rounded-4 dropdown-toggle d-flex align-items-center' id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
                        <CalendarArrowDown className='me-2 text-success transactions-options-icon'/>
                         <p className='mb-0'>Sort by Date</p>
                         </button>
-                        </div>
+
+                         {/* sorting menu */}
+                        <ul className="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                          <li>
+                            <a 
+                          className="dropdown-item border-bottom border-muted" 
+                          role='button'
+                          // set transaction order in descending (latest)
+                          onClick={() => setSortOrder({ascending: false, descending: true})}>
+                             {'Latest (Default)'}
+                            </a></li>
+
+                          <li>
+                            <a className="dropdown-item" 
+                          // set transaction order in descending (oldest )
+                            onClick={() => setSortOrder({ascending: true, descending: false})}
+                            role='button'>
+                              Oldest
+                              </a>
+                            </li>
+                        </ul>
+
+
+                  </div>
+  
+                       </div>
                     </div>
                 </div>
     
@@ -72,7 +128,7 @@
     
                         <button 
                 className={`text-success fw-bold  text-decoration-underline border-0 bg-transparent transaction-overview-btn`}
-                onClick={()=> setOverviewPopup(true)}>
+                onClick={()=> setOverviewPopup(true)}> 
                         View Summary
                         </button>
                            
