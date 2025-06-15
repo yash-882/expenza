@@ -46,7 +46,7 @@ body{
    background-color: #949494;
 }
 
-/* transaction type(salary or expense) */
+/* transaction type(income or expense) */
 .transaction-type{
   font-size: 15px;
 }
@@ -110,7 +110,7 @@ body{
     font-size: 13px;
 }
 
-/* transaction type(salary or expense) */
+/* transaction type(income or expense) */
 .transaction-type{
   font-size: 14px;
 }
