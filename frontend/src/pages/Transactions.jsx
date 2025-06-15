@@ -2,6 +2,8 @@
     import {Settings2Icon , CalendarArrowDown } from 'lucide-react'
     import axios from 'axios'
     import TransactionOverview from '../components/modals/TransactionOverview';
+    import getReadableDate from '../utils/functions/readable-date';
+    
     
     function Transactions() {
         let [transactionData, setTransactionData] = useState([])
@@ -119,7 +121,7 @@
                     {/* transaction added dated */}
                     <p 
                     className={`ms-1 pb-1 transaction-date border-bottom border-secondary fw-bold`}>
-                          {tran.createdAt}
+                          {(getReadableDate(tran.createdAt))}
                     </p>
     
     
