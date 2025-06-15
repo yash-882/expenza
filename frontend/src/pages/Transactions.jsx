@@ -1,10 +1,12 @@
     import React, { useEffect, useState } from 'react'
     import {Settings2Icon , CalendarArrowDown } from 'lucide-react'
     import axios from 'axios'
+    import TransactionOverview from '../components/modals/TransactionOverview';
     
     function Transactions() {
         let [transactionData, setTransactionData] = useState([])
         let [message, setMessage] = useState('');
+        let [overviewPopup, setOverviewPopup] = useState(false)
     
         // fetch transactions
         async function fetchTransactions(){
@@ -26,10 +28,11 @@
     
             // fetch transactions...
             fetchTransactions()
-        }, [])
-    
-      return (
-        <div className='container-fluid pt-2'>
+          }, [])
+          
+          return (
+            <>
+            <div className='container-fluid pt-2'>
             
             <div className="row d-flex justify-content-center">
                 {/* options (filter, sort, etc) */}
@@ -58,18 +61,19 @@
                   <div className="row transaction-history-container d-flex justify-content-center">
     
            {/* Heading */}
-           <div className='col-11 col-xl-8 mb-1 transaction-card-heading d-flex justify-content-between'>
+           <div className='col-11 px-0 col-xl-8 mb-1 transaction-card-heading d-flex align-items-center justify-content-between'>
                     <p className='mb-0 fw-bold'>
                         {transactionData.length + ' Transaction(s) are found'}
                     </p>
     
                       {/* remaining  budget*/}
-                      <span className='fw-normal'>
-                        Budget left:
-                        <span className=' ms-1 text-danger fw-bold'>
-                             $500
-                            </span>
-                        </span>
+    
+                        <button 
+                className={`text-success fw-bold  text-decoration-underline border-0 bg-transparent transaction-overview-btn`}
+                onClick={()=> setOverviewPopup(true)}>
+                        View Summary
+                        </button>
+                           
                 </div>
     
              {/* Each transaction */}
@@ -146,8 +150,10 @@
                    { transactionData.length?  "End of results": ''}
                </h4>
                 </div>
-          
+
         </div>
+        {overviewPopup ? <TransactionOverview hidePopup = {() => setOverviewPopup(false)}/> : ''}
+        </>
       )
     }
     
