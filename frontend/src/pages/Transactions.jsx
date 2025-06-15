@@ -85,7 +85,7 @@
                                className='fw-bold text-capitalize transaction-category mb-0 d-flex align-items-end'>
                                 {tran.category + ' |'}
             
-                               {/* transaction type (expense or salary)*/}
+                               {/* transaction type (expense or income)*/}
                                <span className='fw-normal text-end text-capitalize ms-1 transaction-type'>
                                   {tran.type}
                                 </span>
@@ -105,10 +105,10 @@
                    {/* transaction amount */}
                     <p 
                     className={`ms-1 fw-bold 
-                    ${tran.type ==='salary' ? 'text-success' : 'text-danger' }`}>
+                    ${tran.type ==='income' ? 'text-success' : 'text-danger' }`}>
     
-                     {/* append '-' on expense and '+' on salary  */}
-                    {tran.type ==='salary' ? `+₹${tran.amount}` : `-₹${tran.amount}` }
+                     {/* append '-' on expense and '+' on income  */}
+                    {tran.type ==='income' ? `+₹${tran.amount}` : `-₹${tran.amount}` }
                         
                     </p>
     
