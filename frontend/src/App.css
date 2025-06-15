@@ -80,6 +80,10 @@ body{
   color: rgb(217, 217, 217);
 }
 
+/* btn to view transaction summary */
+.transaction-overview-btn:hover{
+    opacity: 0.7;
+}
 
 /* Mobile and Tablet devices */
 @media (max-width: 768px){
