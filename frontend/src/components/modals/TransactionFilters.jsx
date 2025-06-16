@@ -2,7 +2,9 @@ import React from 'react'
 import PopupWrapper from '../PopupWrapper'
 import { transactionCategories } from '../../constants/transactions/transaction-categories'
 import {Settings2Icon} from 'lucide-react'
-function TransactionFilters() {
+
+
+function TransactionFilters({closeSlidePanel}) {
 
   return (
     <PopupWrapper>
@@ -74,7 +76,9 @@ function TransactionFilters() {
                         Clear Filters
                     </button>
                     {/* close panel */}
-                    <button className='btn mb-1 btn-secondary fw-bold'>
+                    <button 
+                    className='btn mb-1  btn-secondary fw-bold'
+                    onClick={closeSlidePanel}>
                         Close
                      </button>
 
