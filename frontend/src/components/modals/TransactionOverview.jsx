@@ -11,7 +11,7 @@ function TransactionOverview({hidePopup}) {
   async function fetchTransactionOverview(){
 
     // fetching API...
-    const result = await axios.get('http://localhost:8000/api/user/setting/transaction-status', {
+    const result = await axios.get('http://192.168.1.7:8000/api/user/setting/transaction-status', {
       withCredentials: true //set credentials
     })
 
