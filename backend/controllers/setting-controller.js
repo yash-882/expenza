@@ -5,7 +5,7 @@ import sendResponse from "../utils/functions/api-response.js";
 import transactionModel from "../models/transaction-model.js";
 import nodemailer from "../utils/functions/nodemailer/nodemailer.js";
 import OTPModel from "../models/otp-model.js";
-import {differenceInMilliseconds} from 'date-fns'
+import {differenceInMilliseconds, subDays} from 'date-fns'
 
 function wrapper(controller) {
     return async (req, res, next) => {
@@ -376,10 +376,23 @@ const transactionStatus = wrapper(async(req, res, next) => {
     // user's monthly budget 
     const monthlyBudget = user.budget?.monthlyBudget;
 
+    
+    let matchedCondition = {};
+    
+    // If budget is set, show transactions since the budget was created
+  if (monthlyBudget) {
+    matchedCondition.createdAt = { "$gt": user.budget.createdAt };
+  } 
+//   show transcations of last 30 days
+  else {
+    const thirtyDaysAgo = subDays(new Date(), 30);
+    matchedCondition.createdAt = { "$gt": thirtyDaysAgo };
+  }
+
     // it returns result inside array as an obj , extracting that obj...
     const [result] = await transactionModel.aggregate([
         // find transactions that were added after the user's latest budget was created
-        {"$match": {user: user._id, createdAt: {'$gt': monthlyBudget }} }, //user's transactions
+        {"$match": {user: user._id, createdAt: matchedCondition.createdAt }}, //user's transactions
 
         {
         //multiple pipelines
@@ -402,12 +415,8 @@ const transactionStatus = wrapper(async(req, res, next) => {
 // that were added while grouping docs 
     let transactionTypes = result.transactionTypes
 
-    // default amount if no transactions were found
-    if(!transactionTypes.length)
-        transactionTypes = [{_id: 'income', totalAmount: 0} , {_id: 'expense', totalAmount: 0}]
-
-    let totalIncome; //total income
-    let totalExpense; //total expense
+    let totalIncome = 0; //total income
+    let totalExpense = 0; //total expense
 
     // extracting amounts of Income and Expense
     transactionTypes.forEach(type => {
@@ -428,6 +437,7 @@ const transactionStatus = wrapper(async(req, res, next) => {
             data: {
                 isLimitExceeded:  totalExpense > monthlyBudget,
                 totalExpense,
+                isBudgetSet: monthlyBudget ? true : false,
                 totalIncome,
                 eachCategoryTotal
             }
