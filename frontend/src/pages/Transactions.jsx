@@ -18,7 +18,7 @@
         async function fetchTransactions(query){
           const queryString = query ? query : '';
                // getting response...
-         const response = await axios.get(`http://localhost:8000/api/transaction${queryString}`, 
+         const response = await axios.get(`http://192.168.1.7:8000/api/transaction${queryString}`, 
             { withCredentials: true }) //sends the request including (cookies, headers)
     
         // api response(contains data, dataLength requestTime)
