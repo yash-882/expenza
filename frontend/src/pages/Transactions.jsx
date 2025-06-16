@@ -3,12 +3,15 @@
     import axios from 'axios'
     import TransactionOverview from '../components/modals/TransactionOverview';
     import getReadableDate from '../utils/functions/readable-date';
+    import TransactionFilters from '../components/modals/TransactionFilters'
     
     
     function Transactions() {
         let [transactionData, setTransactionData] = useState([])
         let [message, setMessage] = useState('');
         let [overviewPopup, setOverviewPopup] = useState(false)
+        let [filtersSlidePanel, setFiltersSlidePanel ] = useState(false)
+
         let [sortOrder, setSortOrder] = useState({
           descending: true,
           ascending: false
@@ -72,7 +75,9 @@
                         <div className="col d-flex justify-content-evenly">
     
                             {/* Filter transactions */}
-                    <button className='rounded-4 d-flex align-items-center '>
+                    <button 
+                    onClick={() => setFiltersSlidePanel(true)}
+                    className='rounded-4 d-flex align-items-center '>
                       <Settings2Icon color='blue' className='me-2 transactions-options-icon'/>  
                       <p className='mb-0'>Filters</p>
                       </button>
@@ -210,6 +215,8 @@
                 </div>
 
         </div>
+        {filtersSlidePanel && <TransactionFilters closeSlidePanel = {()=>setFiltersSlidePanel(false)}/>}
+
         {overviewPopup ? <TransactionOverview hidePopup = {() => setOverviewPopup(false)}/> : ''}
         </>
       )
