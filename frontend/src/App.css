@@ -90,6 +90,26 @@ body{
   animation: popup-animation 0.5s ;
 }
 
+/* slide panel that contains filter for transactions */
+.transaction-filter-silde-panel{
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+  position: absolute;
+  top:0;
+}
+
+/* category/amount option */
+.transaction-category-option{
+  color: rgb(82, 82, 82); 
+  background-color: rgb(231, 231, 231);
+  border-radius: 15px;
+  box-shadow: 0px 0px 3px rgb(175, 175, 175);
+}
+
+.transaction-category-option:hover{
+  cursor: pointer;
+}
+
 @keyframes popup-animation {
   from{
     opacity: 0;
