@@ -1,14 +1,12 @@
 import React from 'react'
 import PopupWrapper from '../PopupWrapper'
-import { transactionCategories } from '../../constants/transactions/transaction-categories'
 import {Settings2Icon} from 'lucide-react'
 
 
-function TransactionFilters({closeSlidePanel}) {
+function TransactionFilters({closeSlidePanel, categories, selectCategory}) {
 
   return (
     <PopupWrapper>
-        {/*  */}
                {/* contains categories and amount */}
         <div className='px-2 py-2 d-flex flex-column align-items-start justify-content-center  transaction-filter-silde-panel bg-light'>
 
@@ -25,15 +23,22 @@ function TransactionFilters({closeSlidePanel}) {
                      {/* // categories */}
                  <div className='d-flex mb-2 flex-wrap transactions-categories-list pt-3' aria-multiselectable={true}>
                      <h5 className='me-2  py-1  fw-bold mb-0'>Categories</h5>
+                
                 {
-                    // category option
-                    transactionCategories.map((categ, index) => (
-
-                        <div className="me-2 mb-2 fw-bold px-2 py-1  transaction-category-option" 
-                        data-id={categ}
-                        key={index}>
+                    categories.map((categ, index) => (
                         
-                            {categ[0].toUpperCase() + categ.slice(1, categ.length)}
+                        // category option
+                        <div 
+                        data-id={categ.id}
+                        className={`${categ.isActive ? 'highlight-filter-option' : ''}
+                        me-2 mb-2 fw-bold px-2 py-1  transaction-category-option`} 
+                        onClick={selectCategory}
+                        key={index}>
+
+                      {/* category name */}
+                      <span>
+                        {categ.id[0].toUpperCase() + categ.id.slice(1, categ.id.length)}
+                        </span>  
 
                         </div>
                             

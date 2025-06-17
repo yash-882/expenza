@@ -4,6 +4,7 @@
     import TransactionOverview from '../components/modals/TransactionOverview';
     import getReadableDate from '../utils/functions/readable-date';
     import TransactionFilters from '../components/modals/TransactionFilters'
+    import { transactionCategories } from '../constants/transactions/transaction-categories';
     
     
     function Transactions() {
@@ -12,11 +13,43 @@
         let [overviewPopup, setOverviewPopup] = useState(false)
         let [filtersSlidePanel, setFiltersSlidePanel ] = useState(false)
 
+        let [categories, setCategories] = useState(
+          // copying categories...
+          transactionCategories.map(categ => ({id: categ, isActive: false}))
+        )
+
         let [sortOrder, setSortOrder] = useState({
           descending: true,
           ascending: false
         })
+
+        function selectCategory(evt){
+          // selected category id
+        const categID = evt.currentTarget.dataset.id;
+        
+        // set category
+        setCategories(allCategs => {
+
+          // get index of selected option from allCategs array
+        const categIndex = allCategs.findIndex(categ => categ.id === categID )
+
+        // new array
+        const updatedCategs = [...allCategs]
+
+        // category option(object) that was clicked
+        const categToMutate = updatedCategs[categIndex]
+ 
+        // modifying the index's value(selected option) in array
+        updatedCategs[categIndex] = {
+          ...categToMutate,
+          isActive: !categToMutate.isActive
+        }
     
+        return updatedCategs;
+
+          })
+    }
+
         // fetch transactions
         async function fetchTransactions(params){
           const setParams = params ? params : '';
@@ -215,9 +248,13 @@
                 </div>
 
         </div>
-        {filtersSlidePanel && <TransactionFilters closeSlidePanel = {()=>setFiltersSlidePanel(false)}/>}
+        {filtersSlidePanel && <TransactionFilters 
+        closeSlidePanel = {()=>setFiltersSlidePanel(false)}
+        selectCategory = {selectCategory}
+        categories={categories}/>}
 
-        {overviewPopup ? <TransactionOverview hidePopup = {() => setOverviewPopup(false)}/> : ''}
+        {overviewPopup ? <TransactionOverview 
+        hidePopup = {() => setOverviewPopup(false)}/> : ''}
         </>
       )
     }
