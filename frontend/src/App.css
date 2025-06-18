@@ -110,8 +110,8 @@ body{
   box-shadow: 0px 0px 3px rgb(175, 175, 175);
   transition: 0.2s all ease-in-out;
   user-select: none;
-
 }
+
 /* applied when the option is selected */
 .highlight-filter-option{
 background-color: #7895b6;
@@ -127,7 +127,7 @@ color: white;
   from{
     opacity: 0;
     transform: scaleX(1) scaleY(0) scaleZ(0);
-
+    
   } 
   to {
     opacity: 1;
