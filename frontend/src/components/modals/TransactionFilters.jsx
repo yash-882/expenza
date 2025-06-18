@@ -4,7 +4,7 @@ import {Settings2Icon} from 'lucide-react'
 
 
 function TransactionFilters(
-    {closeSlidePanel, categories, selectCategory, handleSortByAmount, sortByAmount}) {
+    {closeSlidePanel, categories, selectCategory, handleSortByAmount, sortByAmount, clearFilters}) {
 
   return (
     <PopupWrapper>
@@ -84,7 +84,9 @@ function TransactionFilters(
                         Apply
                     </button>
                     {/* clear filters */}
-                    <button className='btn mb-1 me-2 text-danger fw-bold'>
+                    <button 
+                    onClick={clearFilters}
+                    className='btn mb-1 me-2 text-danger fw-bold'>
                         Clear Filters
                     </button>
                     {/* close panel */}

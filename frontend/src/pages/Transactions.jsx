@@ -18,11 +18,21 @@
           // copying categories...
           transactionCategories.map(categ => ({id: categ, isActive: false}))
         )
-
+        
         let [sortOrder, setSortOrder] = useState({
           descending: true,
           ascending: false
         })
+        
+        function clearFilters() {
+
+          // reset all selected categories
+          setCategories(  
+            transactionCategories.map(categ => ({id: categ, isActive: false})) 
+          )
+          // reset sort value
+          setSortByAmount('')
+        }
 
         function handleSortByAmount(evt){
           const btnID = evt.currentTarget.dataset.id;
@@ -262,13 +272,17 @@
                 </div>
 
         </div>
+
+        {/* slider-panel for filtering transactions */}
         {filtersSlidePanel && <TransactionFilters 
         closeSlidePanel = {()=>setFiltersSlidePanel(false)}
         selectCategory = {selectCategory}
         categories={categories}
         handleSortByAmount = {handleSortByAmount}
-        sortByAmount = {sortByAmount}/>}
+        sortByAmount = {sortByAmount}
+        clearFilters = {clearFilters}/>}
 
+        {/* transactions overview */}
         {overviewPopup ? <TransactionOverview 
         hidePopup = {() => setOverviewPopup(false)}/> : ''}
         </>
