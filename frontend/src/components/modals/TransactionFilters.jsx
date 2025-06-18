@@ -51,7 +51,7 @@ handleSortByAmount, sortByAmount, clearFilters, handleSetTransactionType, transa
             <div 
                  role='button' 
                 data-id='expense'
-                 className={` ${transactionType === 'type-expense' ? 'highlight-filter-option': ''} 
+                 className={` ${transactionType.expense ? 'highlight-filter-option': ''} 
                  me-2 mb-2 fw-bold px-2 py-1 transaction-category-option`}
                  onClick={handleSetTransactionType}>
                     Expense
@@ -59,7 +59,7 @@ handleSortByAmount, sortByAmount, clearFilters, handleSetTransactionType, transa
             <div 
                  role='button' 
                 data-id='income'
-                 className={` ${transactionType === 'type-income' ? 'highlight-filter-option': ''} 
+                 className={` ${transactionType.income ? 'highlight-filter-option': ''} 
                  me-2 mb-2 fw-bold px-2 py-1 transaction-category-option`}
                  onClick={handleSetTransactionType}>
                     Income
