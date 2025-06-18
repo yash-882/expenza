@@ -1,10 +1,34 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import PopupWrapper from '../PopupWrapper'
 import {Settings2Icon} from 'lucide-react'
 
 
 function TransactionFilters(
-    {closeSlidePanel, categories, selectCategory, handleSortByAmount, sortByAmount, clearFilters}) {
+{fetchTransactions, createParameters, 
+closeSlidePanel, categories, selectCategory, 
+handleSortByAmount, sortByAmount, clearFilters}) {
+
+    let [isApplied, setSetApplied] = useState(false)
+    
+     function handleSetApplied(){
+        setSetApplied(true) // apply filters
+        
+    }
+
+    useEffect(()=> {
+
+        // fetch transactions if the filters are applied
+        async function executeFetching(){
+            if(isApplied){
+                closeSlidePanel() //close slide panel
+                let params = createParameters() //create query parameters
+               await fetchTransactions(params) //fetch transactions
+            }
+    }
+
+        executeFetching()
+
+    }, [isApplied])
 
   return (
     <PopupWrapper>
@@ -80,7 +104,9 @@ function TransactionFilters(
                 className='filter-panel-btn-group '>
 
                      {/* apply filters */}
-                    <button className='btn mb-1 me-2 text-primary fw-bold'>
+                    <button 
+                    onClick={handleSetApplied}
+                    className='btn mb-1 me-2 text-primary fw-bold'>
                         Apply
                     </button>
                     {/* clear filters */}
