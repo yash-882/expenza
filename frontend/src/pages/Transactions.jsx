@@ -13,7 +13,10 @@
         let [overviewPopup, setOverviewPopup] = useState(false)
         let [filtersSlidePanel, setFiltersSlidePanel ] = useState(false)
         let [sortByAmount, setSortByAmount] = useState('')
-        let [transactionType, setTransactionType] = useState('');
+        let [transactionType, setTransactionType] = useState({
+          expense: false,
+          income: false
+        })
 
         let [categories, setCategories] = useState(
           // copying categories...
@@ -49,19 +52,15 @@
           }        
       }
 
+      // set transaction type
         function handleSetTransactionType(evt){
           // selected transaction-type id
           const transacTypeID = evt.currentTarget.dataset.id;        
 
-          // if selected type is expense
-          if(transacTypeID === 'expense'){
-            setTransactionType('type-expense')
-          }
-          // if selected type is income
-          else if(transacTypeID === 'income'){
-            setTransactionType('type-income')
-          }
+          // selected types
+          setTransactionType(prevType => ({...prevType, [transacTypeID]: !prevType[transacTypeID]}))  
         }
+      
 
         function selectCategory(evt){
           // selected category id
@@ -119,6 +118,18 @@
           // sorting parameters
           let qs = 'sort=' + toSortBy.join(',') + '&' 
 
+
+          // filter transaction type
+
+         //if type is 
+         if(transactionType.expense)
+          qs = qs + 'type=expense&'
+
+         //sort order by date is applied in descending
+          if(transactionType.income){
+            qs = qs + 'type=income&'
+         }
+
         // if any category(s) are selected
         if(selectedCategories.length){
             selectedCategories.forEach(categ => {
@@ -127,13 +138,11 @@
               qs = qs.concat(`category=${!categ.emoji ? categ.id : categ.emoji + ' ' + (categ.id)}&`)
             })
         }
-      
-        
+         
         // remove '&' from the end of query string
         if(qs[qs.length-1] === '&')
             qs = qs.slice(0, qs.length - 1)
-
-        
+          
         // encodes a full URI by escaping special characters like spaces, but keeps URI structure (e.g. ?, =, &)
         return encodeURI(qs)
     }
@@ -160,7 +169,7 @@
           // sort order of transactions...
           let params = createParameters();
           
-          // if 
+          // if sorting applied
           if(sortOrder.ascending || sortOrder.descending)
           fetchTransactions(params)
 
@@ -170,7 +179,6 @@
           return (
             <>
             <div className='container-fluid pt-2'>
-            
             <div className="row d-flex justify-content-center">
                 {/* options (filter, sort, etc) */}
                 <div 
