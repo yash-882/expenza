@@ -3,7 +3,8 @@ import PopupWrapper from '../PopupWrapper'
 import {Settings2Icon} from 'lucide-react'
 
 
-function TransactionFilters({closeSlidePanel, categories, selectCategory}) {
+function TransactionFilters(
+    {closeSlidePanel, categories, selectCategory, handleSortByAmount, sortByAmount}) {
 
   return (
     <PopupWrapper>
@@ -54,7 +55,10 @@ function TransactionFilters({closeSlidePanel, categories, selectCategory}) {
 {/* sort by lowest to highest amount */}
                  <div 
                  role='button' 
-                 className="me-2 mb-2 fw-bold px-2 py-1 transaction-category-option">
+                 data-id='ascending'
+                 className={` ${sortByAmount === 'sort-in-ascending' ? 'highlight-filter-option': ''} 
+                 me-2 mb-2 fw-bold px-2 py-1 transaction-category-option`}
+                 onClick={handleSortByAmount}>
                     Lowest to highest
 
                     </div>
@@ -63,7 +67,10 @@ function TransactionFilters({closeSlidePanel, categories, selectCategory}) {
 
                  <div 
                  role='button' 
-                 className="me-2 mb-2 fw-bold  px-2 py-1 transaction-category-option">
+                data-id='descending'
+                 className={` ${sortByAmount === 'sort-in-descending' ? 'highlight-filter-option': ''} 
+                 me-2 mb-2 fw-bold px-2 py-1 transaction-category-option`}
+                 onClick={handleSortByAmount}>
                     Highest to lowest
                     </div>
 
