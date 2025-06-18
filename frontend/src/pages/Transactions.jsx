@@ -74,6 +74,54 @@
           })
     }
 
+    // create query parameters
+    function createParameters(){
+
+        // filter only selected categories
+        const selectedCategories = categories.filter(categ => categ.isActive)
+
+        // params to be used for sorting results
+        let toSortBy = []
+        // sorting amount order
+        if(sortByAmount === 'sort-in-ascending')
+          toSortBy.push('amount')
+        
+        else if(sortByAmount === 'sort-in-descending')
+            toSortBy.push('-amount')
+            
+
+          //sort order by date is applied in ascending
+          if(sortOrder.ascending)
+           toSortBy.push('createdAt')
+
+          
+          //sort order by date is applied in descending
+          else if(sortOrder.descending){
+            toSortBy.push('-createdAt')
+          }
+
+          // sorting parameters
+          let qs = 'sort=' + toSortBy.join(',') + '&' 
+
+        // if any category(s) are selected
+        if(selectedCategories.length){
+            selectedCategories.forEach(categ => {
+   
+                // appending categories
+              qs = qs.concat(`category=${!categ.emoji ? categ.id : categ.emoji + ' ' + (categ.id)}&`)
+            })
+        }
+      
+        
+        // remove '&' from the end of query string
+        if(qs[qs.length-1] === '&')
+            qs = qs.slice(0, qs.length - 1)
+
+        
+        // encodes a full URI by escaping special characters like spaces, but keeps URI structure (e.g. ?, =, &)
+        return encodeURI(qs)
+    }
+
         // fetch transactions
         async function fetchTransactions(params){
           const setParams = params ? params : '';
@@ -90,36 +138,19 @@
         //  additional message (client has no transactions and other infos)
          setMessage(apiResponse.message || '')
         }
-    
-        useEffect(()=>{
-    
-            // fetch transactions...
-            fetchTransactions()
-          }, [])
-
-
-          async function sortTransactionOrder(){
-            let params = ''; //will contain a field as a part of query string for sorting
-
-            //sort order is applied in ascending
-            if(sortOrder.ascending)
-              params = 'sort=createdAt'
-
-            //sort order is applied descending
-            else if(sortOrder.descending){
-              params = 'sort=-createdAt'
-            }
-
-            // fetch transactions...
-            fetchTransactions(params)
-          }
-
-          useEffect(()=> {
-            // sort order of transactions...
-            sortTransactionOrder()
-
-          }, [sortOrder.ascending, sortOrder.descending])
           
+          
+          useEffect(()=> {
+          // sort order of transactions...
+          let params = createParameters();
+          
+          // if 
+          if(sortOrder.ascending || sortOrder.descending)
+          fetchTransactions(params)
+
+        }, [sortOrder.descending, sortOrder.ascending])
+
+
           return (
             <>
             <div className='container-fluid pt-2'>
@@ -280,7 +311,9 @@
         categories={categories}
         handleSortByAmount = {handleSortByAmount}
         sortByAmount = {sortByAmount}
-        clearFilters = {clearFilters}/>}
+        clearFilters = {clearFilters}
+        fetchTransactions={fetchTransactions}
+        createParameters={createParameters}/>}
 
         {/* transactions overview */}
         {overviewPopup ? <TransactionOverview 
