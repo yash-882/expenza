@@ -12,6 +12,7 @@
         let [message, setMessage] = useState('');
         let [overviewPopup, setOverviewPopup] = useState(false)
         let [filtersSlidePanel, setFiltersSlidePanel ] = useState(false)
+        let [sortByAmount, setSortByAmount] = useState('')
 
         let [categories, setCategories] = useState(
           // copying categories...
@@ -22,6 +23,19 @@
           descending: true,
           ascending: false
         })
+
+        function handleSortByAmount(evt){
+          const btnID = evt.currentTarget.dataset.id;
+
+          // sort transactions by amount in ascending order
+          if(btnID === 'ascending'){
+            setSortByAmount('sort-in-ascending')
+          }
+          // sort transactions by amount in descending order
+          else if(btnID === 'descending'){
+            setSortByAmount('sort-in-descending')
+          }        
+      }
 
         function selectCategory(evt){
           // selected category id
@@ -251,7 +265,9 @@
         {filtersSlidePanel && <TransactionFilters 
         closeSlidePanel = {()=>setFiltersSlidePanel(false)}
         selectCategory = {selectCategory}
-        categories={categories}/>}
+        categories={categories}
+        handleSortByAmount = {handleSortByAmount}
+        sortByAmount = {sortByAmount}/>}
 
         {overviewPopup ? <TransactionOverview 
         hidePopup = {() => setOverviewPopup(false)}/> : ''}
