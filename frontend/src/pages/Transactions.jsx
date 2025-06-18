@@ -13,6 +13,7 @@
         let [overviewPopup, setOverviewPopup] = useState(false)
         let [filtersSlidePanel, setFiltersSlidePanel ] = useState(false)
         let [sortByAmount, setSortByAmount] = useState('')
+        let [transactionType, setTransactionType] = useState('');
 
         let [categories, setCategories] = useState(
           // copying categories...
@@ -23,6 +24,7 @@
           descending: true,
           ascending: false
         })
+
         
         function clearFilters() {
 
@@ -46,6 +48,20 @@
             setSortByAmount('sort-in-descending')
           }        
       }
+
+        function handleSetTransactionType(evt){
+          // selected transaction-type id
+          const transacTypeID = evt.currentTarget.dataset.id;        
+
+          // if selected type is expense
+          if(transacTypeID === 'expense'){
+            setTransactionType('type-expense')
+          }
+          // if selected type is income
+          else if(transacTypeID === 'income'){
+            setTransactionType('type-income')
+          }
+        }
 
         function selectCategory(evt){
           // selected category id
@@ -313,7 +329,9 @@
         sortByAmount = {sortByAmount}
         clearFilters = {clearFilters}
         fetchTransactions={fetchTransactions}
-        createParameters={createParameters}/>}
+        createParameters={createParameters}
+        handleSetTransactionType = {handleSetTransactionType}
+        transactionType={transactionType}/>}
 
         {/* transactions overview */}
         {overviewPopup ? <TransactionOverview 
