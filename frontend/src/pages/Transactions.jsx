@@ -16,7 +16,7 @@
 
         let [categories, setCategories] = useState(
           // copying categories...
-          transactionCategories.map(categ => ({id: categ, isActive: false}))
+          transactionCategories.map(categ => ({...categ, isActive: false}))
         )
         
         let [sortOrder, setSortOrder] = useState({
@@ -28,7 +28,7 @@
 
           // reset all selected categories
           setCategories(  
-            transactionCategories.map(categ => ({id: categ, isActive: false})) 
+            transactionCategories.map(categ => ({...categ, isActive: false})) 
           )
           // reset sort value
           setSortByAmount('')
