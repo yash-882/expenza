@@ -6,7 +6,7 @@ import {Settings2Icon} from 'lucide-react'
 function TransactionFilters(
 {fetchTransactions, createParameters, 
 closeSlidePanel, categories, selectCategory, 
-handleSortByAmount, sortByAmount, clearFilters}) {
+handleSortByAmount, sortByAmount, clearFilters, handleSetTransactionType, transactionType}) {
 
     let [isApplied, setSetApplied] = useState(false)
     
@@ -44,9 +44,31 @@ handleSortByAmount, sortByAmount, clearFilters}) {
                 </h4>
             
         </div>
+
+{/* transaction type */}
+          <div className='d-flex flex-wrap   pt-3 pb-2 transactions-categories-list'>  
+              <h5 className='me-2 py-1 mb-0 fw-bold'>Type</h5>
+            <div 
+                 role='button' 
+                data-id='expense'
+                 className={` ${transactionType === 'type-expense' ? 'highlight-filter-option': ''} 
+                 me-2 mb-2 fw-bold px-2 py-1 transaction-category-option`}
+                 onClick={handleSetTransactionType}>
+                    Expense
+                </div>
+            <div 
+                 role='button' 
+                data-id='income'
+                 className={` ${transactionType === 'type-income' ? 'highlight-filter-option': ''} 
+                 me-2 mb-2 fw-bold px-2 py-1 transaction-category-option`}
+                 onClick={handleSetTransactionType}>
+                    Income
+                </div>
+
+          </div>
         
                      {/* // categories */}
-                 <div className='d-flex mb-2 flex-wrap transactions-categories-list pt-3' aria-multiselectable={true}>
+                 <div className='d-flex py-2 flex-wrap transactions-categories-list ' aria-multiselectable={true}>
                      <h5 className='me-2  py-1  fw-bold mb-0'>Categories</h5>
                 
                 {
@@ -73,7 +95,7 @@ handleSortByAmount, sortByAmount, clearFilters}) {
 
                 </div>
                 {/* option to sort by amount */}
-                    <div className='d-flex flex-wrap mb-3 transactions-categories-list'>
+                    <div className='d-flex py-2 flex-wrap mb-3 transactions-categories-list'>
                      <h5 className='me-2 py-1 fw-bold mb-0'>Sort by Amount</h5>
 
 {/* sort by lowest to highest amount */}
