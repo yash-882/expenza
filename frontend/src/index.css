@@ -2,6 +2,9 @@
   font-family:"custom font";
   src: url("./assets/fonts/Mulish-VariableFont_wght.ttf") format("truetype");
 }
+#root{
+  height: 100%;
+}
 *{
   margin: 0;         /* Remove default margins */
   padding: 0;        /* Remove default padding */
@@ -11,4 +14,7 @@
 } 
 button{
   cursor: pointer;
+}
+html, body{
+  height: 100%;
 }
