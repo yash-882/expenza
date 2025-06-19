@@ -4,7 +4,7 @@ import { UserContext } from "../UserContext";
 
 
 function UserProvider(props) {
-    let [isAuthenticated, setIsAuthenticated] = useState(null)
+    let [isAuthenticated, setIsAuthenticated] = useState(true)
 
     async function isUserAuthenticated(){
         try{
