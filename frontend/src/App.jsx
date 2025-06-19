@@ -20,7 +20,7 @@ function App() {
     <Navbar setNavbarRef = {setNavbarRef}/>
 
     {/* Main content */}
-    <main style={{ marginTop: marginTop }}> 
+    <main style={{  marginTop: marginTop }}> 
 
     <Outlet/>
 
