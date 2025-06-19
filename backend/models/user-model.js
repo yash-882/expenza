@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import bcrypt from 'bcrypt'
+import CustomError from '../errors/custom-error-class.js'
 
 const userSchema = mongoose.Schema({
     name: {
@@ -52,7 +53,10 @@ const userSchema = mongoose.Schema({
 userSchema.pre('save', async function (next) {
 
     if (this.password !== this.confirmPassword)
-        return next(new Error('Please re-enter your Password correctly'))
+        return next(new CustomError({
+    name: 'BadRequestError', message: 
+    'Please confirm your password correctly'
+}))
 
     this.password = await bcrypt.hash(this.password, 12);
     this.confirmPassword = undefined;
