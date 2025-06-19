@@ -12,3 +12,7 @@
 button{
   cursor: pointer;
 }
+
+html, body, #root{
+  height: 100%;
+}
