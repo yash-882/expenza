@@ -1,6 +1,7 @@
 import axios from 'axios'
-import React, { useState } from 'react'
+import React, { useContext, useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { UserContext } from '../contexts/UserContext'
 
 function Login() {
     let [credentials, setCredentials] = useState({
@@ -8,6 +9,7 @@ function Login() {
     })
     let [errMessage, setErrMessage] = useState('')
     let [loading, setLoading] = useState(false)
+    let {isAuthenticated, setIsAuthenticated} = useContext(UserContext)
     let navigate = useNavigate()
 
     async function handleLogin(evt){
@@ -31,10 +33,9 @@ function Login() {
              })
             //  remove loading
         setLoading(false)
-        
 
-        // redirect the user to transactions page after successful login
-        navigate('/')
+        // user is authenticated now
+        setIsAuthenticated(true)
 
                 
         } catch(err){
@@ -46,6 +47,15 @@ function Login() {
             
         }
     }
+    
+            useEffect(() => {
+            // redirect to '/' if already authenticated
+            if(isAuthenticated){
+                  navigate('/')
+            }
+    
+            }, [isAuthenticated])
+
   return (
     <div className='d-flex justify-content-center align-items-center'>
 

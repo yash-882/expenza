@@ -1,13 +1,20 @@
-    import React, { useEffect, useState } from 'react'
+    import React, { useContext, useEffect, useState } from 'react'
     import {Settings2Icon , CalendarArrowDown } from 'lucide-react'
     import axios from 'axios'
     import TransactionOverview from '../components/modals/TransactionOverview';
     import getReadableDate from '../utils/functions/readable-date';
     import TransactionFilters from '../components/modals/TransactionFilters'
     import { transactionCategories } from '../constants/transactions/transaction-categories';
+    import { UserContext } from '../contexts/UserContext';
+    import { Navigate, useNavigate } from 'react-router-dom';
     
     
     function Transactions() {
+  
+      // user's authentication status
+      const {isAuthenticated, setIsAuthenticated} = useContext(UserContext)
+      const navigate = useNavigate()
+      
         let [transactionData, setTransactionData] = useState([])
         let [message, setMessage] = useState('');
         let [overviewPopup, setOverviewPopup] = useState(false)
@@ -170,6 +177,13 @@
            setLoading(false) // remove loading after setting data
    
         }
+
+        useEffect(() => {
+          // redirect to '/login' if not authenticated
+          if(!isAuthenticated)
+            navigate('/login')
+
+        }, [isAuthenticated])
           
           
           useEffect(()=> {
