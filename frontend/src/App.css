@@ -143,8 +143,6 @@ color: white;
 }
 /* login form */
 .login-form{
-  box-shadow: 0px 0px 10px rgb(87, 87, 87);
-  background-color: rgb(196, 196, 196);
   width: 400px;
   height: 400px;
 }
@@ -320,4 +318,21 @@ font-size: 14px;
 .transaction-card-heading{
 font-size: 12px;
 }
+
+.login-form{
+  width: 250px;
+  height: 400px;
+}
+.email-input, .password-input{
+     width: 200px;
+     font-size: 15px;
+}
+
+/* login to account button */
+.login-btn{
+  width: 200px;
+  background-color: #717fcc;
+  font-size: 20px;
+}
+
 }
