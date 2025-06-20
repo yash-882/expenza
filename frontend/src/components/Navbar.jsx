@@ -10,16 +10,9 @@ function Navbar({setNavbarRef}) {
 
   let navbarRef = useRef(null)
   let {isAuthenticated, setIsAuthenticated} = useContext(UserContext)
-  const initialState = isAuthenticated ? '/' : '/login';
   
-  let [activeTab, setActiveTab] = useState(initialState)
-
-  useEffect(() => {
-    // set initial state of links based on authentication status
-  const initialState = isAuthenticated ? '/' : '/login';
-  setActiveTab(initialState) //update selected link
-
-  }, [isAuthenticated])
+  // returns the pathname of url (using for only highlighting the active tab on the first render)
+  let [activeTab, setActiveTab] = useState(window.location.pathname); 
   
 
 useEffect(() => {
