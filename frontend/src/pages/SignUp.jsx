@@ -3,6 +3,8 @@ import React, { useContext, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { UserContext } from '../contexts/UserContext'
+import { Eye, EyeOff } from 'lucide-react'
+
 
 function SignUp() {
 
@@ -14,7 +16,18 @@ function SignUp() {
 
     let [errMessage, setErrMessage] = useState('')
     let [loading, setLoading] = useState(false)
+    let [showPassword, setShowPassword] = useState(false)
+    
     let navigate = useNavigate()
+
+     function handleShowPassword (evt){
+      evt.preventDefault();
+    //   show/hide password
+      
+    //  input has some text
+      if(credentials.password)
+      setShowPassword(v => !v)
+    }
 
   async function handleSignup(evt){
         evt.preventDefault()
@@ -86,6 +99,8 @@ function SignUp() {
     placeholder='Name' 
     value={credentials.name}
     onChange={(evt) => setCredentials(cred => ({...cred, name: evt.target.value}))}/>
+
+    {/* input email */}
     <input 
     type="text" 
     className='px-2  py-2 mb-3 border-dark border-0 rounded-3 email-input' 
@@ -95,15 +110,25 @@ function SignUp() {
         
         {/* input password */}
         <input 
-        type="text" 
-        className='px-2  py-2 border-dark border-0 rounded-3 mb-3 password-input'
+         type={showPassword ? 'text' : 'password'}
+        className='px-2  py-2 border-dark border-0 rounded-3 mb-1 password-input'
         placeholder='Password (at least 8 characters)'
         value={credentials.password}
         onChange={(evt) => setCredentials(cred => ({...cred, password: evt.target.value}))}/>
+         <button 
+        className='btn btn-sm mb-1 d-flex align-items-center' 
+        onClick={handleShowPassword}>
+
+           <span className='d-flex align-items-center'> {showPassword ? 
+            <><EyeOff className='me-1'/> Hide password</> : 
+            
+         <><Eye className='me-1'/> Show password </>} </span>
+            
+            </button>
 
         {/* input confirm password */}
         <input 
-        type="text" 
+        type="password" 
         className='px-2  py-2 border-dark border-0 rounded-3 mb-3 password-input'
         placeholder='Confirm password'
         value={credentials.confirmPassword}
