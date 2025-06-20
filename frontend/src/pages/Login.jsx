@@ -2,6 +2,8 @@ import axios from 'axios'
 import React, { useContext, useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { UserContext } from '../contexts/UserContext'
+import { Eye, EyeOff } from 'lucide-react'
+
 
 function Login() {
     let [credentials, setCredentials] = useState({
@@ -10,7 +12,17 @@ function Login() {
     let [errMessage, setErrMessage] = useState('')
     let [loading, setLoading] = useState(false)
     let {isAuthenticated, setIsAuthenticated} = useContext(UserContext)
+    let [showPassword, setShowPassword] = useState(false)
     let navigate = useNavigate()
+
+    function handleShowPassword (evt){
+      evt.preventDefault();
+    //   show/hide password
+      
+    //  input has some text
+      if(credentials.password)
+      setShowPassword(v => !v)
+    }
 
     async function handleLogin(evt){
         evt.preventDefault()
@@ -85,11 +97,23 @@ function Login() {
         
         {/* input password */}
         <input 
-        type="text" 
-        className='px-2  py-2 border-dark border-0 rounded-3 mb-3 password-input'
+        type={showPassword ? 'text' : 'password'}
+        className='px-2  py-2 border-dark border-0 rounded-3 mb-2 password-input'
         placeholder='Password'
         value={credentials.password}
-        onChange={(evt) => setCredentials(cred => ({...cred, password: evt.target.value}))}/>
+        onChange={(evt) => setCredentials(cred => ({...cred, password: evt.target.value}))}
+        /> 
+        
+        <button 
+        className='btn btn-sm mb-4 d-flex align-items-center' 
+        onClick={handleShowPassword}>
+
+           <span className='d-flex align-items-center'> {showPassword ? 
+            <><EyeOff className='me-1'/> Hide password</> : 
+            
+         <><Eye className='me-1'/> Show password </>} </span>
+            
+            </button>
 
         {/* submit button */}
         <button 
