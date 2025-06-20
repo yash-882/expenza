@@ -1,12 +1,26 @@
-import { useEffect, useRef, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import {Link} from "react-router-dom"
 import { NavLinks } from '@constants/nav-bar/links.js';
 import ExpenzaLogo from "@assets/images/EXPENZA-LOGO.png"
+import { UserContext } from '../contexts/UserContext';
+import { UserCircle2 } from "lucide-react"
+
 
 function Navbar({setNavbarRef}) {
 
-let [activeTab, setActiveTab] = useState('/')
-let navbarRef = useRef(null)
+  let navbarRef = useRef(null)
+  let {isAuthenticated, setIsAuthenticated} = useContext(UserContext)
+  const initialState = isAuthenticated ? '/' : '/login';
+  
+  let [activeTab, setActiveTab] = useState(initialState)
+
+  useEffect(() => {
+    // set initial state of links based on authentication status
+  const initialState = isAuthenticated ? '/' : '/login';
+  setActiveTab(initialState) //update selected link
+
+  }, [isAuthenticated])
+  
 
 useEffect(() => {
 
@@ -40,7 +54,10 @@ useEffect(() => {
         <ul className="d-flex border-0 text-white py-2 gap-2 list-unstyled nav-tabs mb-2 mb-lg-0">
 
             {
-              //Rendering links...
+              // show links if authorized
+              isAuthenticated ? 
+
+          (    //Rendering links...
                 NavLinks.map(({label, icon: Icon, path, className}, index) => (
                     <li className="nav-item" key={index}>
 
@@ -57,7 +74,25 @@ useEffect(() => {
                  <span>{label}</span></Link>
           </li>
 
-              ))
+              ))): ( 
+
+                // show link 'login' when unauthorised
+              <li className="nav-item">
+                        {/* login Link */}
+            <Link onClick={()=> setActiveTab('/login')} 
+              className={`nav-link nav-link-css border-0 rounded-4 p-2 ${
+                activeTab === '/login' ? 'link-active' : ''
+              }`} to= '/login'>
+                
+                {/* link label with icon */}
+                <UserCircle2 className='nav-icon nav-icon-login me-2'/>
+                
+                {/* Link's label */}
+                 <span className = 'nav-login-label'>
+                  Login
+                </span>
+                 </Link>
+          </li>)
           }
 
         </ul>

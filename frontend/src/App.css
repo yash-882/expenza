@@ -208,9 +208,13 @@ color: white;
 
 /* Mobile and Tablet devices */
 @media (max-width: 768px){
-  /* remove written content and use onlt icons */
+  /* remove label  and use only icons for some links in navbar*/
   .nav-link-css span{
     display: none;
+  }
+  /* keep label for '/login' link*/
+  .nav-login-label{
+    display: inline !important;
   }
   /* nav links */
   .nav-link-css{
@@ -225,6 +229,11 @@ color: white;
     margin-right: 0px !important;
   }
   
+
+  /* keep margin for login */
+  .nav-icon-login{
+    margin-right: 5px !important;
+  }
   /* website logo */
   .expenza-logo img{
       height:50px;
