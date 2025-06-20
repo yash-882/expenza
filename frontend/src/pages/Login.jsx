@@ -111,7 +111,7 @@ function Login() {
         </Link>
 
         {/* sign up link */}
-        <Link href="#" className='nav-link text-primary'>
+        <Link to= '/sign-up' className='nav-link text-primary'>
         Sign up
         </Link>
     </form>
