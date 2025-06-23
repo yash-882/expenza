@@ -10,7 +10,7 @@ export const NavLinks =  [   {
         // link to add transaction
         {
             label: 'Add Transaction',
-            path: '#add-transaction',
+            path: '/add-transaction',
             icon: PlusCircle,
             className: 'nav-icon me-2 text-info'
         },

@@ -115,6 +115,21 @@ body{
   cursor: pointer;
 }
 
+.transaction-form-dropdown{
+  background-color:rgb(210, 210, 210);
+  box-shadow: 0px 0px 3px rgb(186, 186, 186);
+}
+
+.transaction-form-input-container{
+    outline: 3px rgb(157, 181, 218) solid;
+    height: 45px;
+}
+
+.dropdown-item-transac{
+    color: black !important;
+
+}
+
 /* applied when the option is selected */
 .highlight-filter-option{
 background-color: #7895b6;
@@ -135,11 +150,17 @@ color: white;
   background-color: #717fcc;
   font-size: 20px;
 }
+/* button to submit a transaction */
+.submit-transaction-btn{
+ background-color: #717fcc;
+  font-size: 20px;
+}
 
 .login-btn:hover{
-  width: 300px;
   background-color: #868fc3;
-  font-size: 20px;
+}
+.submit-transaction-btn:hover{
+  background-color: #868fc3;
 }
 /* login form */
 .login-form{
@@ -271,6 +292,10 @@ color: white;
 .transaction-card-heading{
 font-size: 14px;
 }
+.form-input-dropdown-btn span{
+  display: none;
+}
+
 
 }
 
@@ -334,5 +359,4 @@ font-size: 12px;
   background-color: #717fcc;
   font-size: 20px;
 }
-
 }
