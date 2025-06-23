@@ -1,6 +1,9 @@
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { categoriesByType } from '../constants/transactions/transaction-categories'
-import { ShoppingBagIcon, ReceiptIndianRupee, BookText } from 'lucide-react'
+import { ShoppingBagIcon, BookText } from 'lucide-react'
+import axios from 'axios'
+import { useNavigate } from 'react-router-dom';
+import { UserContext } from '../contexts/UserContext';
 
 
 function AddTransaction() {
@@ -9,9 +12,41 @@ function AddTransaction() {
     let [type, setType] = useState('');
     let [amount, setAmount] = useState(null);
     let [description, setDescription] = useState('')
-
     let [errMessage, setErrMessage] = useState('')
     let [loading, setLoading] = useState(false)
+
+    // user's authentication status
+    const {isAuthenticated, setIsAuthenticated} = useContext(UserContext)
+    const navigate = useNavigate()
+
+    async function addTransaction(evt){
+        evt.preventDefault()
+        try{
+            
+            setErrMessage(''); // clear error message
+            setLoading(true); // show loading
+            
+            // sending request for storing the transaction...
+            await axios.post('http://192.168.1.7:8000/api/transaction/create', {
+                type,
+                amount,
+                description,
+                category
+
+                
+            }, {
+                withCredentials: true
+               
+            })
+           setLoading(false)  
+
+        } catch(err){
+
+           setLoading(false)  
+            setErrMessage(err.response?.data.message ||  'Server error, please try again later')
+
+        }
+    }
 
     function handleCategory(evt) {
         //get category ID through dataset attribute
@@ -59,6 +94,13 @@ function AddTransaction() {
 
     }, [type])
 
+         useEffect(() => {
+              // redirect to '/login' if not authenticated
+              if(!isAuthenticated)
+                navigate('/login')
+    
+        }, [isAuthenticated])
+
 
     return (
         <div className='d-flex justify-content-center w-`00 align-items-center'>
@@ -72,12 +114,12 @@ function AddTransaction() {
                 <h4 className='fw-bolder mb-2'>Add Transaction</h4>
 
                 {/* err message if occurs */}
-                <p className={`${errMessage ? 'visible' : 'invisible'} text-danger`}>
+                <p className={`${errMessage ? 'visible' : 'invisible'} text-center text-danger`}>
                     {errMessage || 'text for occupying space'}
                 </p>
 
                 {/* transaction form */}
-                <form className="d-flex w-100 justify-content-center  align-items-center flex-column">
+                <form onSubmit={addTransaction} className="d-flex w-100 justify-content-center  align-items-center flex-column">
 
                     {/* form fields container*/}
 
@@ -218,12 +260,12 @@ function AddTransaction() {
                             {/* submit */}
 
                             <div
-                                className=" col-11 col-lg-6 col-md-6 col-xl-3 d-flex p-2  rounded-3 ">
+                                className=" col-11 col-lg-6 col-md-6 col-xl-3 d-flex p-2   rounded-3 ">
 
                                 {/* button for submit transaction */}
                                 <button
                                     type='submit'
-                                    className='btn w-100 fw-bold text-white submit-transaction-btn'>
+                                    className='btn w-100 fw-bold text-white d-flex justify-content-center submit-transaction-btn'>
 
                                     {/* loader */}
                                     <p
