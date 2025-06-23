@@ -49,6 +49,16 @@ handleSortByAmount, sortByAmount, clearFilters, handleSetTransactionType, transa
           <div className='d-flex flex-wrap   pt-3 pb-2 transactions-categories-list'>  
               <h5 className='me-2 py-1 mb-0 fw-bold'>Type</h5>
             <div 
+                role='button' 
+                data-id='all'
+                className={` 
+                ${(!transactionType.expense && !transactionType.income) || transactionType.all? 
+                'highlight-filter-option': ''} 
+                 me-2 mb-2 fw-bold px-2 py-1 transaction-category-option`}
+                 onClick={handleSetTransactionType}>
+                    All
+                </div>
+            <div 
                  role='button' 
                 data-id='expense'
                  className={` ${transactionType.expense ? 'highlight-filter-option': ''} 
