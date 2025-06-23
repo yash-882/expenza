@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react'
 import { categoriesByType } from '../constants/transactions/transaction-categories'
-import { ShoppingBagIcon, BookText } from 'lucide-react'
+import { ShoppingBagIcon, ReceiptIndianRupee, BookText } from 'lucide-react'
 
 
 function AddTransaction() {
     let [category, setCategory] = useState('');
     let [categoryList, setCategoryList] = useState([])
     let [type, setType] = useState('');
+    let [amount, setAmount] = useState(null);
+    let [description, setDescription] = useState('')
 
     let [errMessage, setErrMessage] = useState('')
     let [loading, setLoading] = useState(false)
@@ -15,7 +17,7 @@ function AddTransaction() {
         //get category ID through dataset attribute
         const categoryID = evt.currentTarget.dataset.id;
 
-        // set categiry
+        // set category
         setCategory(categoryID)
 
     }
@@ -28,6 +30,20 @@ function AddTransaction() {
         // clear err message 
         if (errMessage === 'Select transaction type first')
             setErrMessage('')
+    }
+
+    function handleAmount(evt){
+        const amount = evt.target.value;
+
+        // set amount
+        setAmount(amount)
+    }
+
+    function handleDescription(evt){
+        const description = evt.target.value;
+
+        // set amount
+        setDescription(description)
     }
 
     useEffect(() => {
@@ -104,7 +120,8 @@ function AddTransaction() {
                                 </div>
                                 {/* toggle to select transaction type */}
                                 <button
-                                    className='fw-bold form-input-dropdown-btn rounded-3 btn-secondary btn btn-sm dropdown-toggle d-flex align-items-center'
+                                    className='fw-bold form-input-dropdown-btn rounded-3
+                                    btn-secondary btn btn-sm dropdown-toggle d-flex align-items-center'
                                     id="dropdownMenuLinkAddTransaction"
                                     data-bs-toggle="dropdown"
                                     aria-expanded="false">
@@ -167,6 +184,38 @@ function AddTransaction() {
 
                                 </div>
                             </div>
+
+                            {/* amount */}
+
+                                   <div
+                                className="col-11 col-lg-6 col-md-6 col-xl-3 d-flex p-2 transaction-form-input-container rounded-3 mb-3 d-flex justify-content-between align-items-center">
+
+                                {/* input for amount */}
+
+                                <input 
+                                type="number" 
+                                className='border-0 w-100 text-black ms-2 fw-bold bg-transparent'
+                                style={{outline: 'none'}}
+                                placeholder='₹ Enter amount'
+                                onChange={handleAmount}/>
+
+                                
+                            </div>
+
+                            {/* description */}
+                            <div
+                                className="col-11 col-lg-6 col-md-6 col-xl-3 d-flex  transaction-form-input-container rounded-3 mb-3 d-flex justify-content-between align-items-center">
+
+                              <input 
+                              type='text'
+                              placeholder='Enter description (optional)'
+                              className='w-100 fw-bold border-0 bg-transparent'
+                              style={{outline: 'none'}}
+                              onChange={handleDescription}
+                              ></input>
+                                </div>
+
+                            {/* submit */}
 
                             <div
                                 className=" col-11 col-lg-6 col-md-6 col-xl-3 d-flex p-2  rounded-3 ">
