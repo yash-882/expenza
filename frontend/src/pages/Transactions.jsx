@@ -22,7 +22,8 @@
         let [sortByAmount, setSortByAmount] = useState('')
         let [transactionType, setTransactionType] = useState({
           expense: false,
-          income: false
+          income: false,
+          all: true
         })
 
         let [categories, setCategories] = useState(
@@ -45,6 +46,9 @@
           )
           // reset sort value
           setSortByAmount('')
+
+          // reset type to 'all'
+          setTransactionType('all')
         }
 
         function handleSortByAmount(evt){
@@ -66,8 +70,25 @@
           const transacTypeID = evt.currentTarget.dataset.id;        
 
           // selected types
-          setTransactionType(prevType => ({...prevType, [transacTypeID]: !prevType[transacTypeID]}))  
-        }
+          setTransactionType(prevType => {
+
+            if(transacTypeID !== 'all')
+              // unhighlight 'all' option when different option is selected
+              return {...prevType, 
+                [transacTypeID]: !prevType[transacTypeID], 
+                all: false, 
+              }
+
+              // highlight 'all' option and unhighlight other deselected options
+              else 
+              return {
+                 expense: false,
+                 income: false,
+                 all: true, 
+              }
+            
+          })  
+      }
       
 
         function selectCategory(evt){
