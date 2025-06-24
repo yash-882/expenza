@@ -90,6 +90,11 @@ body{
   animation: popup-animation 0.5s ;
 }
 
+.delete-confirmation-popup{
+  animation: popup-animation 0.3s ;
+
+}
+
 .transaction-filter-silde-panel{
   animation: slide-panel-animation 0.5s ease-in-out ;
 }

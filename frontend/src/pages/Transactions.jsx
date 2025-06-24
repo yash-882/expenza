@@ -7,6 +7,7 @@
     import { transactionCategories } from '../constants/transactions/transaction-categories';
     import { UserContext } from '../contexts/UserContext';
     import { Navigate, useNavigate } from 'react-router-dom';
+import DeleteConfirmation from '../components/modals/DeleteConfirmation';
     
     
     function Transactions() {
@@ -20,6 +21,8 @@
         let [overviewPopup, setOverviewPopup] = useState(false)
         let [filtersSlidePanel, setFiltersSlidePanel ] = useState(false)
         let [sortByAmount, setSortByAmount] = useState('')
+        let [deleteTransacPopup,  setDeleteTransacPopup] = useState(false)
+
         let [transactionType, setTransactionType] = useState({
           expense: false,
           income: false,
@@ -37,6 +40,10 @@
         })
 
         let [loading, setLoading ] = useState(false)
+
+        function showDeleteTransacPopup(){
+          setDeleteTransacPopup(true)
+        }
         
         function clearFilters() {
 
@@ -307,10 +314,14 @@
                     </span>
                   </span>
 
-                  {/* options */}
+                   {/* options */}
                   <span className='mb-0'>
                     {/* Delete transaction */}
-                    <button className='btn text-danger transaction-card-opt text-white p-1'>
+                    <button 
+                    className='btn text-danger transaction-card-opt text-white p-1'
+                    onClick={showDeleteTransacPopup}
+                    // transaction ID from database
+                     id={tran._id}> 
                       Delete
                     </button>
                   </span>
@@ -368,11 +379,18 @@
       fetchTransactions={fetchTransactions}
       createParameters={createParameters}
       handleSetTransactionType={handleSetTransactionType}
-      transactionType={transactionType} />}
+      transactionType={transactionType} 
+      />}
 
     {/* transactions overview */}
     {overviewPopup ? <TransactionOverview
       hidePopup={() => setOverviewPopup(false)} /> : ''}
+
+    {/* confirmation popoup */}
+    {deleteTransacPopup
+    
+    ? <DeleteConfirmation
+      hidePopup={() => setDeleteTransacPopup(false)} /> : ''}
   </>
 )
 
