@@ -15,6 +15,8 @@ function AddTransaction() {
     let [errMessage, setErrMessage] = useState('')
     let [loading, setLoading] = useState(false)
 
+   
+
     // user's authentication status
     const {isAuthenticated, setIsAuthenticated} = useContext(UserContext)
     const navigate = useNavigate()
@@ -82,15 +84,19 @@ function AddTransaction() {
     }
 
     useEffect(() => {
-
-        //set category  list based on the 'type'
-
+        
+        // each 'type' has their separate category set
+        //so clear category input every time 'type' input is triggered because if 'type' is selected after 
+        // 'category', it can mix up 'expense' categories with 'income' ones and vice versa 
+        setCategory('')
+        
         if (type === 'expense') {
             setCategoryList(categoriesByType.expense)
-
+            
         } else if (type === 'income') {
             setCategoryList(categoriesByType.income)
         }
+            
 
     }, [type])
 
@@ -103,7 +109,7 @@ function AddTransaction() {
 
 
     return (
-        <div className='d-flex justify-content-center w-`00 align-items-center'>
+        <div className='d-flex justify-content-center align-items-center'>
 
 
             {/* add-transaction form */}
@@ -167,6 +173,7 @@ function AddTransaction() {
                                     id="dropdownMenuLinkAddTransaction"
                                     data-bs-toggle="dropdown"
                                     aria-expanded="false">
+                                
                                     <BookText />
                                     <span className='ms-1'>Type</span>
                                 </button>
@@ -175,6 +182,7 @@ function AddTransaction() {
 
                             {/* category  */}
                             <div
+                           
                                 className=" col-11 col-lg-6 col-md-6 col-xl-3 d-flex p-2 transaction-form-input-container rounded-3 mb-3 d-flex justify-content-between">
                                 {/* shows current selected category */}
                                 <input
