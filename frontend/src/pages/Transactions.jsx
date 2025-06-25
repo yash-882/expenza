@@ -8,7 +8,7 @@
     import { UserContext } from '../contexts/UserContext';
     import { Navigate, useNavigate } from 'react-router-dom';
 import DeleteConfirmation from '../components/modals/DeleteConfirmation';
-    
+import NotificationPopup from '../components/modals/NotificationPopup';    
     
     function Transactions() {
   
@@ -23,6 +23,11 @@ import DeleteConfirmation from '../components/modals/DeleteConfirmation';
         let [sortByAmount, setSortByAmount] = useState('')
         let [deleteTransacPopup,  setDeleteTransacPopup] = useState(false)
         let [transacIDToDelete, setTransacIDToDelete] = useState('')
+        let [notificationPopup, showNotificationPopup] = useState(false)
+        let [notificationInfo, setNotificationInfo] = useState({
+              type: '',
+              message: '',
+          });
 
         let [transactionType, setTransactionType] = useState({
           expense: false,
@@ -43,9 +48,22 @@ import DeleteConfirmation from '../components/modals/DeleteConfirmation';
         let [loading, setLoading ] = useState(false)
 
         function showDeleteTransacPopup(evt){
+          
           setTransacIDToDelete(evt.target.id)
           // show confirmation popup before deletion
           setDeleteTransacPopup(true)
+        }
+
+        function notifyPopup({type, message}){
+
+          // set message 
+          setNotificationInfo({
+            type: type,
+            message: message
+          })
+        
+          // show notification popup
+          showNotificationPopup(true)
         }
         
         function clearFilters() {
@@ -302,7 +320,7 @@ import DeleteConfirmation from '../components/modals/DeleteConfirmation';
           ) : transactionData?.length ? (
             transactionData.map((tran, index) => (
               <div className={`col-12 mb-2 col-xl-8 transaction-card py-3`}
-                key={index} id={index}>
+              key={index} id={index}>
 
                 {/*  transaction details */}
                 <div className='mb-3 d-flex justify-content-between align-items-center'>
@@ -324,7 +342,7 @@ import DeleteConfirmation from '../components/modals/DeleteConfirmation';
                     className='btn text-danger transaction-card-opt text-white p-1'
                     onClick={showDeleteTransacPopup}
                     // transaction ID from database
-                     id={tran._id}> 
+                    id={tran._id}> 
                       Delete
                     </button>
                   </span>
@@ -395,7 +413,11 @@ import DeleteConfirmation from '../components/modals/DeleteConfirmation';
     ? <DeleteConfirmation
       hidePopup={() =>{ setTransacIDToDelete(''); setDeleteTransacPopup(false)}} 
       dataToDelete = {{apiPath: 'transaction', id: transacIDToDelete}}
-      refetchData={fetchTransactions}/> : ''}
+      refetchData={fetchTransactions}
+      notifyPopup = {notifyPopup}/> : ''}
+
+        {/* notification message */}
+     {notificationPopup && <NotificationPopup removePopup={()=>showNotificationPopup(false)} notificationInfo={notificationInfo}/>}
   </>
 ) 
     }

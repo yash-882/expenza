@@ -230,6 +230,33 @@ color: white;
   }
 }
 
+/* notification popup */
+.notification-popup{
+  position: fixed;
+  min-height: 45px;
+  min-width: 280px;
+  max-width: 320px;
+  border-radius: 12px;
+  background-color: rgb(229, 229, 229);
+  box-shadow: 0px 0px 3px #000000;
+  animation: notification-popup-animation 0.7s ease-in-out;
+  z-index: 10000;
+  top: 100px;
+  right: 50%;
+  transform: translateX(50%);
+}
+
+@keyframes notification-popup-animation {
+  from{
+    opacity: 0;
+    transform:  translateX(50%) translateY(-100%);
+  } 
+  to {
+    opacity: 1;
+    transform: translateX(50%) translateY(0);
+  }
+}
+
 /* Mobile and Tablet devices */
 @media (max-width: 768px){
   /* remove label  and use only icons for some links in navbar*/
