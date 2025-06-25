@@ -22,6 +22,7 @@ import DeleteConfirmation from '../components/modals/DeleteConfirmation';
         let [filtersSlidePanel, setFiltersSlidePanel ] = useState(false)
         let [sortByAmount, setSortByAmount] = useState('')
         let [deleteTransacPopup,  setDeleteTransacPopup] = useState(false)
+        let [transacIDToDelete, setTransacIDToDelete] = useState('')
 
         let [transactionType, setTransactionType] = useState({
           expense: false,
@@ -41,7 +42,9 @@ import DeleteConfirmation from '../components/modals/DeleteConfirmation';
 
         let [loading, setLoading ] = useState(false)
 
-        function showDeleteTransacPopup(){
+        function showDeleteTransacPopup(evt){
+          setTransacIDToDelete(evt.target.id)
+          // show confirmation popup before deletion
           setDeleteTransacPopup(true)
         }
         
@@ -390,11 +393,11 @@ import DeleteConfirmation from '../components/modals/DeleteConfirmation';
     {deleteTransacPopup
     
     ? <DeleteConfirmation
-      hidePopup={() => setDeleteTransacPopup(false)} /> : ''}
+      hidePopup={() =>{ setTransacIDToDelete(''); setDeleteTransacPopup(false)}} 
+      dataToDelete = {{apiPath: 'transaction', id: transacIDToDelete}}
+      refetchData={fetchTransactions}/> : ''}
   </>
-)
-
-
+) 
     }
     
     export default Transactions
