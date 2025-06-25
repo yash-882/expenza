@@ -1,5 +1,5 @@
     import React, { useContext, useEffect, useState } from 'react'
-    import {Settings2Icon , CalendarArrowDown } from 'lucide-react'
+    import {Settings2Icon , CalendarArrowDown, BadgeJapaneseYenIcon } from 'lucide-react'
     import axios from 'axios'
     import TransactionOverview from '../components/modals/TransactionOverview';
     import getReadableDate from '../utils/functions/readable-date';
@@ -17,15 +17,21 @@ import NotificationPopup from '../components/modals/NotificationPopup';
       const navigate = useNavigate()
       
         let [transactionData, setTransactionData] = useState([])
+
+        // messages that comes along with the data or if no data found
         let [message, setMessage] = useState('');
         let [overviewPopup, setOverviewPopup] = useState(false)
         let [filtersSlidePanel, setFiltersSlidePanel ] = useState(false)
         let [sortByAmount, setSortByAmount] = useState('')
         let [deleteTransacPopup,  setDeleteTransacPopup] = useState(false)
         let [transacIDToDelete, setTransacIDToDelete] = useState('')
+
+        // popup for wrapping error messages in GET request
         let [notificationPopup, showNotificationPopup] = useState(false)
+
+        // notification typically for error messages in GET request
         let [notificationInfo, setNotificationInfo] = useState({
-              type: '',
+              type: '', 
               message: '',
           });
 
@@ -206,6 +212,7 @@ import NotificationPopup from '../components/modals/NotificationPopup';
 
         // fetch transactions
         async function fetchTransactions(params){
+          try{
           const setParams = params ? params : '';
           // getting response...
 
@@ -215,16 +222,24 @@ import NotificationPopup from '../components/modals/NotificationPopup';
     
         // api response(contains data, dataLength requestTime)
          const apiResponse = response.data;
-         
-         
 
+         
            //  transaaction data
            setTransactionData(apiResponse.data || [])
            //  additional message (client has no transactions and other infos)
            setMessage(apiResponse.message || '')
 
            setLoading(false) // remove loading after setting data
-   
+        } catch(err){
+
+          // set error message and display it inside a popup
+          notifyPopup({
+            type: 'error', 
+            message: err.response?.data.message || 'Server error, please try again later'
+          })
+
+            setLoading(false) // remove loading after setting data
+        }   
         }
 
         useEffect(() => {
