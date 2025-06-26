@@ -4,6 +4,7 @@ import { ShoppingBagIcon, BookText } from 'lucide-react'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom';
 import { UserContext } from '../contexts/UserContext';
+import NotificationPopup from '../components/modals/NotificationPopup';
 
 
 function AddTransaction() {
@@ -14,8 +15,26 @@ function AddTransaction() {
     let [description, setDescription] = useState('')
     let [errMessage, setErrMessage] = useState('')
     let [loading, setLoading] = useState(false)
+    // notification content
+    let [notificationInfo, setNotificationInfo] = useState({
+        type: '', 
+        message: ''
+    })
 
-   
+    // popup for wrapping messages in POST request (added successfully)
+    let [notificationPopup, showNotificationPopup] = useState(false)
+
+        function notifyPopup({type, message}){
+            
+          // set message 
+          setNotificationInfo({
+            type: type,
+            message: message
+          })
+        
+          // show notification popup
+          showNotificationPopup(true)
+        }
 
     // user's authentication status
     const {isAuthenticated, setIsAuthenticated} = useContext(UserContext)
@@ -41,6 +60,9 @@ function AddTransaction() {
                
             })
            setLoading(false)  
+
+        //    show success message
+           notifyPopup({type: 'success', message: 'Transaction added successfully'})
 
         } catch(err){
 
@@ -296,6 +318,8 @@ function AddTransaction() {
 
 
             </div>
+
+        {notificationPopup && <NotificationPopup notificationInfo={notificationInfo} removePopup={()=> showNotificationPopup(false)}/>}
         </div>
     )
 }
