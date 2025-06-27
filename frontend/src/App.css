@@ -246,6 +246,18 @@ color: white;
   transform: translateX(50%);
 }
 
+/* each setting section(privacy, personal info, etc) of account setting */
+.account-setting-section{
+  width: 30%;
+  box-shadow: 0px 1px 4px rgb(180, 180, 180);
+  background-color:rgb(239, 239, 239) ;
+}
+
+/* setting option */
+.setting-individual-option, .setting-individual-option button{
+  background-color: rgba(125, 125, 125, 0.03);
+}
+
 @keyframes notification-popup-animation {
   from{
     opacity: 0;
@@ -328,8 +340,12 @@ font-size: 14px;
   display: none;
 }
 
-
+/* each setting section(privacy, personal info, etc) of account setting */
+.account-setting-section{
+  width: 95%;
 }
+}
+
 
 
 /* Small mobiles */

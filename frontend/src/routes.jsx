@@ -4,6 +4,7 @@ import Transactions from './pages/Transactions';
 import Login from './pages/Login';
 import SignUp from './pages/SignUp';
 import AddTransaction from './pages/AddTransaction';
+import Settings from './pages/Settings';
 
 const router = createBrowserRouter([
     {
@@ -25,7 +26,11 @@ const router = createBrowserRouter([
             {
                 element: <AddTransaction/>,
                 path : '/add-transaction',
-            }
+            },
+            {
+                element: <Settings/>,
+                path : '/account-settings',
+            },
 
         ]
     }
