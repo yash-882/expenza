@@ -126,19 +126,19 @@ body{
 }
 
 .transaction-form-input-container{
-    outline: 3px rgb(157, 181, 218) solid;
-    height: 45px;
+  outline: 3px rgb(157, 181, 218) solid;
+  height: 45px;
 }
 
 .dropdown-item-transac{
-    color: black !important;
-
+  color: black !important;
+  
 }
 
 /* applied when the option is selected */
 .highlight-filter-option{
-background-color: #7895b6;
-color: white; 
+  background-color: #7895b6;
+  color: white; 
 }
 
 /* email and password input */
@@ -157,7 +157,7 @@ color: white;
 }
 /* button to submit a transaction */
 .submit-transaction-btn{
- background-color: #717fcc;
+  background-color: #717fcc;
   font-size: 20px;
 }
 
@@ -175,35 +175,39 @@ color: white;
 
 /* loader */
 .loader {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      position: relative;
-      animation: rotate 1s linear infinite
-    }
-    .loader::before {
-      content: "";
-      box-sizing: border-box;
-      position: absolute;
-      inset: 0px;
-      border-radius: 50%;
-      border: 5px solid #2d2d2d;
-      animation: prixClipFix 3s linear infinite ;
-    }
-    
-    
-    @keyframes rotate {
-      100%   {transform: rotate(360deg)}
-    }
-    
-    @keyframes prixClipFix {
-        0%   {clip-path:polygon(50% 50%,0 0,0 0,0 0,0 0,0 0)}
-        25%  {clip-path:polygon(50% 50%,0 0,100% 0,100% 0,100% 0,100% 0)}
-        50%  {clip-path:polygon(50% 50%,0 0,100% 0,100% 100%,100% 100%,100% 100%)}
-        75%  {clip-path:polygon(50% 50%,0 0,100% 0,100% 100%,0 100%,0 100%)}
-        100% {clip-path:polygon(50% 50%,0 0,100% 0,100% 100%,0 100%,0 0)}
-    }
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  position: relative;
+  animation: rotate 1s linear infinite
+}
+.loader::before {
+  content: "";
+  box-sizing: border-box;
+  position: absolute;
+  inset: 0px;
+  border-radius: 50%;
+  border: 5px solid #2d2d2d;
+  animation: prixClipFix 3s linear infinite ;
+}
+
+
+@keyframes rotate {
+  100%   {transform: rotate(360deg)}
+}
+
+@keyframes prixClipFix {
+  0%   {clip-path:polygon(50% 50%,0 0,0 0,0 0,0 0,0 0)}
+  25%  {clip-path:polygon(50% 50%,0 0,100% 0,100% 0,100% 0,100% 0)}
+  50%  {clip-path:polygon(50% 50%,0 0,100% 0,100% 100%,100% 100%,100% 100%)}
+  75%  {clip-path:polygon(50% 50%,0 0,100% 0,100% 100%,0 100%,0 100%)}
+  100% {clip-path:polygon(50% 50%,0 0,100% 0,100% 100%,0 100%,0 0)}
+}
 /* animation classes */
+.profile-view-popup{
+  animation: popup-animation 0.5s ease-in-out;
+}
+
 @keyframes popup-animation {
   from{
     opacity: 0;
@@ -219,13 +223,13 @@ color: white;
 /* (top to bottom) */
 @keyframes slide-panel-animation {
   from{
-
+    
     transform: translateY(-100%) ;
-
-
+    
+    
   } 
   to {
-
+    
     transform: translateY(0) ;
   }
 }
@@ -245,6 +249,17 @@ color: white;
   right: 50%;
   transform: translateX(50%);
 }
+@keyframes notification-popup-animation {
+  from{
+    opacity: 0;
+    transform:  translateX(50%) translateY(-100%);
+  } 
+  to {
+    opacity: 1;
+    transform: translateX(50%) translateY(0);
+  }
+}
+
 
 /* each setting section(privacy, personal info, etc) of account setting */
 .account-setting-section{
@@ -256,17 +271,6 @@ color: white;
 /* setting option */
 .setting-individual-option, .setting-individual-option button{
   background-color: rgba(125, 125, 125, 0.03);
-}
-
-@keyframes notification-popup-animation {
-  from{
-    opacity: 0;
-    transform:  translateX(50%) translateY(-100%);
-  } 
-  to {
-    opacity: 1;
-    transform: translateX(50%) translateY(0);
-  }
 }
 
 /* Mobile and Tablet devices */
