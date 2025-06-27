@@ -3,6 +3,7 @@ import AccountSettings from '../constants/settings/settings'
 import { SettingsIcon } from 'lucide-react'
 import { UserContext } from '../contexts/UserContext';
 import {useNavigate} from 'react-router-dom'
+import ProfileView from '../components/modals/ProfileView'
 
 
 function Settings() {
@@ -15,9 +16,19 @@ function Settings() {
     if(!isAuthenticated){
       navigate('/login')
     }
-              
-  // state to manage selected setting
+
+ // state for select individual setting
   const [setting, setSetting] = useState({path: '', isActive: false});
+
+  function handleSettingClick(event) {
+    //  get clicked button id
+    const path = event.target.id;
+
+    if(path){
+      // show setting
+      setSetting({path, isActive: true})
+    }
+  }
 
   return (
     <div 
@@ -44,6 +55,7 @@ function Settings() {
               <button 
               className='btn py-3 rounded-3  w-100'
               id={option.path}
+              onClick={handleSettingClick}
               >
 
               {option.label}
@@ -54,6 +66,9 @@ function Settings() {
         
         </div>
 ))}
+{/* show account details */}
+{setting.path === '/account-details' && setting.isActive && 
+<ProfileView closePopup={()=> setSetting({path: '/account-details', isActive: false})}/>}
       
     </div>
   )
