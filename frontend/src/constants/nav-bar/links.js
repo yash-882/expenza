@@ -17,7 +17,7 @@ export const NavLinks =  [   {
         // settings
         {
             label: 'Settings',
-            path: '#settings',
+            path: '/account-settings',
             icon: UserCircle2,
             className: 'nav-icon me-2'
         },
