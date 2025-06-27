@@ -1,8 +1,13 @@
-import React from 'react'
+import React, { useState } from 'react'
 import AccountSettings from '../constants/settings/settings'
 import { SettingsIcon } from 'lucide-react'
 
+
 function Settings() {
+
+  // state to manage selected setting
+  const [setting, setSetting] = useState({path: '', isActive: false});
+
   return (
     <div 
     className='py-3 d-flex flex-column align-items-center justify-content-center'>
@@ -12,7 +17,7 @@ function Settings() {
      </h4>
 
 {
-  // 
+  // settings is an array of sections, each section contains multiple options
     AccountSettings.map((section, index) => (
       <div 
       key={index} 
@@ -25,7 +30,10 @@ function Settings() {
             <div 
             key={index}
             className="setting-individual-option mb-2  w-100 rounded-3">
-              <button className='btn py-3 rounded-3  w-100'>
+              <button 
+              className='btn py-3 rounded-3  w-100'
+              id={option.path}
+              >
 
               {option.label}
               </button>
