@@ -4,6 +4,7 @@ import { SettingsIcon } from 'lucide-react'
 import { UserContext } from '../contexts/UserContext';
 import {useNavigate} from 'react-router-dom'
 import ProfileView from '../components/modals/ProfileView'
+import ProfileUpdate from '../components/modals/ProfileUpdate';
 
 
 function Settings() {
@@ -69,6 +70,15 @@ function Settings() {
 {/* show account details */}
 {setting.path === '/account-details' && setting.isActive && 
 <ProfileView closePopup={()=> setSetting({path: '/account-details', isActive: false})}/>}
+
+{/* change email */}
+{setting.path === '/change-email' && setting.isActive && 
+<ProfileUpdate 
+  closePopup={()=> setSetting({path: '/change-email', isActive: false})}
+  placeholder ='Enter new email'
+  heading = 'Change email'
+  description = 'An OTP will be requested to the new email'
+  action = 'EmailUpdation'/>}
       
     </div>
   )
