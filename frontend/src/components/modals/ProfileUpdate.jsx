@@ -1,7 +1,54 @@
-import React from 'react'
+import React, { useState } from 'react'
 import PopupWrapper from '../PopupWrapper'
+import OtpPopup from './OtpPopup'
+import axios from 'axios'
+import NotificationPopup from './NotificationPopup'
 
-function ProfileUpdate({heading, placeholder, closePopup}) {
+function ProfileUpdate({heading, placeholder, description, closePopup}) {
+    let [notify, setNotify] = useState(false)
+    let [notificationInfo, setNotificationInfo] = useState({type: '', message: ''})
+    let [email, setEmail] = useState('')
+    let [loading, setLoading] = useState(false)
+
+    async function requestOTP(evt){
+        evt.preventDefault()
+        try{
+            setNotificationInfo({type: '', message: ''}) //reset notification for each request
+
+            setLoading(true) //show loading
+            // requesting OTP...
+            const response = await axios.post('http://192.168.1.7:8000/api/user/setting/verify-email',
+                {
+                    newEmail: email //new email
+                }, 
+                {
+                    withCredentials: true
+                })
+
+                setLoading(false) //remove loader
+                // api response
+            const apiResponse = response.data;
+            
+            // show popup that includes success message
+            setNotificationInfo({type: 'success', message: apiResponse.message})
+
+            // show notification popup
+            setNotify(true)
+            
+        }
+        catch(err){
+            setLoading(false) //remove loader
+            
+            // show popup that includes failure message
+            setNotificationInfo({type: 'error', 
+                message: err.response?.data.message || 'Server error, please try again later'})
+
+            // show notification popup
+            setNotify(true)
+
+        }
+    }
+
   return (
     <PopupWrapper>
 
@@ -9,15 +56,21 @@ function ProfileUpdate({heading, placeholder, closePopup}) {
     <div 
     className='profile-update-popup p-4 d-flex flex-column bg-light  justify-content-center rounded-4'>
 
-        <form>
+        <form onSubmit={requestOTP}>
 
 {/* label for changing email */}
-            <label htmlFor="modify-profile" className='mb-4 fw-bold'>
+            <label htmlFor="modify-profile" className='mb-4'>
+                {/* updation content heading */}
                 <h5 className='fw-bold mb-4'>{heading}</h5>
+
+                {/* update description */}
+                <p>{description}</p>
 
                {/* input to enter new email */}
                 <input 
-                type="text" 
+                type="text"
+                onChange={evt => setEmail(evt.target.value)}
+                value={email} 
                 id='modify-profile'
                 className=' rounded-3 p-2 w-100 border-0'
                 style={{outline: "solid 3px rgb(157, 181, 218)"}}
@@ -30,13 +83,17 @@ function ProfileUpdate({heading, placeholder, closePopup}) {
             <div className='w-100 d-flex flex-wrap flex-column'>
 
 {/* submit button */}
-            <button 
+            <button
             type='submit'
+            className='text-white d-flex justify-content-center align-items-center btn fw-bold bg-primary mb-2 rounded-3 border-0'>
 
-            className='text-white btn fw-bold bg-primary mb-2  rounded-3 border-0'>
-
-                Submit
-
+                {loading ? 
+                // show loading...
+                <p 
+                className='loader mb-0'
+                style={{width: '25px', height: '25px'}}
+                ></p> :
+                'Submit'}
             </button>
 
 {/* close popup button */}
@@ -51,10 +108,14 @@ function ProfileUpdate({heading, placeholder, closePopup}) {
             </button>
 
             </div>
-
         </form>
 
     </div>
+
+    {/* show response message */}
+    {notify && <NotificationPopup 
+    notificationInfo={notificationInfo} 
+    removePopup={()=> setNotify(false)}/>}
     </PopupWrapper>
   )
 }
