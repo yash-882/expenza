@@ -3,7 +3,7 @@ import AccountSettings from '../constants/settings/settings'
 import { SettingsIcon } from 'lucide-react'
 import ProfileView from '../components/modals/ProfileView'
 import ProfileUpdate from '../components/modals/ProfileUpdate';
-
+import TransactionOverview from '../components/modals/TransactionOverview'
 
 function Settings() {
 
@@ -76,6 +76,11 @@ function Settings() {
   placeholder ='Enter new name'
   heading = 'Change name'
   action = 'NameUpdation'/>}
+
+{/* show transaction overview */}
+{setting.path === '/transaction-status' && setting.isActive && 
+<TransactionOverview 
+  hidePopup = {()=> setSetting({path: '/transaction-status', isActive: false})}/>}
       
     </div>
   )
