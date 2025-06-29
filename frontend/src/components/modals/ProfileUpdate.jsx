@@ -4,7 +4,7 @@ import OtpPopup from './OtpPopup'
 import axios from 'axios'
 import NotificationPopup from './NotificationPopup'
 
-function ProfileUpdate({heading, placeholder, description, closePopup}) {
+function ProfileUpdate({heading, placeholder, action, description, closePopup}) {
     let [notify, setNotify] = useState(false)
     let [notificationInfo, setNotificationInfo] = useState({type: '', message: ''})
     let [email, setEmail] = useState('')
@@ -49,14 +49,24 @@ function ProfileUpdate({heading, placeholder, description, closePopup}) {
             // show popup that includes failure message
             setNotificationInfo({type: 'error', 
                 message: err.response?.data.message || 'Server error, please try again later'})
-
-            // show notification popup
-            setNotify(true)
+                
+                // show notification popup
+                setNotify(true)
+            }
         }
-    }
+        
 
-  return (
-    <>
+        // Object for storing state management, api calls for different fields(name, email, etc)
+        const updateActions = {
+            EmailUpdation: {
+                apiCall: requestOTP, 
+                changeState: (evt) => setEmail(evt.target.value),
+                value: email
+            },
+         }
+
+        return (
+            <>
     {/* hide popup when another popup displays(OTP popup) */}
     <PopupWrapper hidden={hidden}>
 
@@ -64,7 +74,7 @@ function ProfileUpdate({heading, placeholder, description, closePopup}) {
     <div 
     className={`profile-update-popup p-4 d-flex flex-column bg-light  justify-content-center rounded-4`}>
 
-        <form onSubmit={requestOTP}>
+        <form onSubmit={ updateActions[action]?.apiCall }>
 
 {/* label for changing email */}
             <label htmlFor="modify-profile" className='mb-4'>
@@ -77,8 +87,8 @@ function ProfileUpdate({heading, placeholder, description, closePopup}) {
                {/* input to enter new email */}
                 <input 
                 type="text"
-                onChange={evt => setEmail(evt.target.value)}
-                value={email} 
+                onChange={updateActions[action]?.changeState}
+                value={updateActions[action]?.value} 
                 id='modify-profile'
                 className=' rounded-3 p-2 w-100 border-0'
                 style={{outline: "solid 3px rgb(157, 181, 218)"}}
