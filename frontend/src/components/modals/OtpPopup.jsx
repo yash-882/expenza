@@ -1,7 +1,9 @@
 import React from 'react'
 import PopupWrapper from '../PopupWrapper'
+import NotificationPopup from './NotificationPopup'
 
-function OtpPopup({heading}) {
+function OtpPopup({heading, removePopup, notify, removeNotificationPopup, notificationInfo}) {
+  
   return (
     <PopupWrapper>
     <div className='bg-light py-4 d-flex w-auto flex-wrap flex-column px-4 rounded-4'>
@@ -48,6 +50,9 @@ function OtpPopup({heading}) {
         </p>
       </div>
     </div>
+   { notify && <NotificationPopup
+    removePopup={removeNotificationPopup}
+    notificationInfo={notificationInfo}/>}
     </PopupWrapper>
 
   )

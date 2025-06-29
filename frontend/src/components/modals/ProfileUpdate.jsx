@@ -9,6 +9,7 @@ function ProfileUpdate({heading, placeholder, description, closePopup}) {
     let [notificationInfo, setNotificationInfo] = useState({type: '', message: ''})
     let [email, setEmail] = useState('')
     let [loading, setLoading] = useState(false)
+    let [hidden, setHidden] = useState(false)
 
     async function requestOTP(evt){
         evt.preventDefault()
@@ -34,7 +35,9 @@ function ProfileUpdate({heading, placeholder, description, closePopup}) {
 
             // show notification popup
             setNotify(true)
-            
+
+            // hide current profile updation popup and show the OTP popup
+            setHidden(true)
         }
         catch(err){
             setLoading(false) //remove loader
@@ -45,16 +48,17 @@ function ProfileUpdate({heading, placeholder, description, closePopup}) {
 
             // show notification popup
             setNotify(true)
-
         }
     }
 
   return (
-    <PopupWrapper>
+    <>
+    {/* hide popup when another popup displays(OTP popup) */}
+    <PopupWrapper hidden={hidden}>
 
         {/* profile updation popup (PATCH) */}
     <div 
-    className='profile-update-popup p-4 d-flex flex-column bg-light  justify-content-center rounded-4'>
+    className={`profile-update-popup p-4 d-flex flex-column bg-light  justify-content-center rounded-4`}>
 
         <form onSubmit={requestOTP}>
 
@@ -112,11 +116,24 @@ function ProfileUpdate({heading, placeholder, description, closePopup}) {
 
     </div>
 
-    {/* show response message */}
-    {notify && <NotificationPopup 
+    </PopupWrapper>
+
+    {/* show notification popup inside the current component only if there is any error occured */}
+    {notify && notificationInfo.type === 'error'  && <NotificationPopup 
     notificationInfo={notificationInfo} 
     removePopup={()=> setNotify(false)}/>}
-    </PopupWrapper>
+
+
+    {/* show OTP popup for OTP validation after sending OTP to the email*/}
+    {
+        notificationInfo.type === 'success' && email && 
+        <OtpPopup
+        notificationInfo={notificationInfo} // notificaton info
+        notify={notify} // notification popup state
+        removeNotificationPopup = {() => setNotify(false)}  //remove notification popup           
+        heading={'Enter OTP for email updation'} /> //OTP for ..
+    }
+</>
   )
 }
 
