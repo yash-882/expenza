@@ -5,13 +5,16 @@ import axios from 'axios'
 
 function OtpPopup(
   {heading, notify, setNotify, removeNotificationPopup, 
-    notificationInfo, setNotificationInfo, removeProfileUpdatePopup, sentTo}) {
+    notificationInfo, setNotificationInfo, removeProfileUpdatePopup, sentTo, resendOtp}) {
 
     let [otp, setOtp] = useState('')
+    let [sendAgain, setSendAgain] = useState(0)
+    let [loading, setLoading] = useState(false)
 
   async function validateOTPAndUpdate(evt) {
-    evt.preventDefault()
+    evt?.preventDefault()
     setNotificationInfo({type: '', message: ''})
+
     try{
    const response = await axios.patch('http://192.168.1.7:8000/api/user/setting/change-email', 
     {otp}, 
@@ -45,9 +48,26 @@ function OtpPopup(
     }
   }
 
+  // resend OTP
+  useEffect(()=> {
+    
+async function execute(){
+  // if client wants to request OTP again
+      if(sendAgain){
+        setLoading(true) //show loading...
+
+        // re-sending OTP... 
+       await resendOtp()
+
+        setLoading(false) //remove loading
+    }
+    }
+    execute()
+
+  }, [sendAgain])
   return (
     <PopupWrapper>
-    <div className='bg-light py-4 d-flex w-auto flex-wrap flex-column px-4 rounded-4'>
+    <div className='bg-light py-4 d-flex w-auto flex-wrap flex-column  px-4 rounded-4'>
         <h5 className='fw-bold mb-4'>
         {/* heading based setting action (change password, change email, etc)*/}
         {heading}
@@ -94,9 +114,13 @@ function OtpPopup(
                 </button>
                 {/* resend otp button */}
                 <button
-                type='button' 
-                className='text-primary bg-transparent border-0 '>
-                    Resend OTP
+                type='button'
+                onClick={(()=> setSendAgain(sendAgain + 1))}
+                className={`${loading? 'text-muted': 'text-primary'} bg-transparent border-0`}
+                disabled= {loading}
+               >
+                {/* show loading when sending again */}
+                 { loading? 'Sending...': 'Resend OTP'}
                 </button>
 
             </div>
