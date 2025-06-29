@@ -79,6 +79,14 @@ function Settings() {
   heading = 'Change email'
   description = 'An OTP will be requested to the new email'
   action = 'EmailUpdation'/>}
+
+{/* change name */}
+{setting.path === '/change-name' && setting.isActive && 
+<ProfileUpdate 
+  closePopup={()=> setSetting({path: '/change-name', isActive: false})}
+  placeholder ='Enter new name'
+  heading = 'Change name'
+  action = 'NameUpdation'/>}
       
     </div>
   )

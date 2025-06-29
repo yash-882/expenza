@@ -11,6 +11,7 @@ function ProfileUpdate({heading, placeholder, action, description, closePopup}) 
     let [loading, setLoading] = useState(false)
     let [hidden, setHidden] = useState(false)
     let [isOtpSent, setOtpSent] = useState(false)
+    let [newName, setNewName] = useState('')
 
     async function requestOTP(evt){
         evt.preventDefault()
@@ -31,7 +32,7 @@ function ProfileUpdate({heading, placeholder, action, description, closePopup}) 
                 // api response
             const apiResponse = response.data;
             
-            // show popup that includes success message
+            //  state that contains success message
             setNotificationInfo({type: 'success', message: apiResponse.message})
 
             // show notification popup
@@ -46,7 +47,7 @@ function ProfileUpdate({heading, placeholder, action, description, closePopup}) 
         catch(err){
             setLoading(false) //remove loader
             
-            // show popup that includes failure message
+            //  state that contains failure message
             setNotificationInfo({type: 'error', 
                 message: err.response?.data.message || 'Server error, please try again later'})
                 
@@ -54,15 +55,58 @@ function ProfileUpdate({heading, placeholder, action, description, closePopup}) 
                 setNotify(true)
             }
         }
-        
 
-        // Object for storing state management, api calls for different fields(name, email, etc)
+        // change user's name 
+        async function changeName(evt) {
+
+            evt.preventDefault()
+            try{
+                // change name...
+                const response = await axios.patch('http://192.168.1.7:8000/api/user/setting/change-name',
+                {newName}, 
+                {withCredentials: true})
+
+             const apiResponse = response.data;
+
+            //  state that contains success message
+            setNotificationInfo({type: 'success', message: apiResponse.message})
+
+            // show popup
+            setNotify(true)
+
+    // remove the popup in 2.5 seconds after notifying(success)
+    setTimeout(() => {
+      closePopup()
+
+    }, 2500);
+        }
+        catch(err){
+
+            //  state that contains error message
+            setNotificationInfo({
+                type: 'error', 
+                message: err.response?.data.message || 'Server error, please try again later'
+            })
+
+        // show popup
+        setNotify(true)
+        }
+
+        }
+
+        // object for storing 
         const updateActions = {
-            EmailUpdation: {
-                apiCall: requestOTP, 
-                changeState: (evt) => setEmail(evt.target.value),
-                value: email
-            },
+            // email updation
+            EmailUpdation:{
+                apiCall: requestOTP, //execute requestOTP handler
+                changeState: (evt) => setEmail(evt.target.value), //change state of email
+                value: email // input's value
+            }, 
+            NameUpdation: {
+                apiCall: changeName, //execute changeName handler
+                changeState: (evt) => setNewName(evt.target.value), //change state of newName
+                value: newName //input's value
+            }
          }
 
         return (
