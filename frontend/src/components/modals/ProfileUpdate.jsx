@@ -14,7 +14,7 @@ function ProfileUpdate({heading, placeholder, action, description, closePopup}) 
     let [newName, setNewName] = useState('')
 
     async function requestOTP(evt){
-        evt.preventDefault()
+        evt?.preventDefault()
         try{
             setNotificationInfo({type: '', message: ''}) //reset notification for each request
 
@@ -193,7 +193,8 @@ function ProfileUpdate({heading, placeholder, action, description, closePopup}) 
         sentTo = {email} //email that will receive the OTP
         setNotificationInfo = {setNotificationInfo} //response message from the server
         setNotify = {setNotify} //set message and its type
-        removeProfileUpdatePopup = {closePopup}/> //remove the ProfileUpdate popup
+        removeProfileUpdatePopup = {closePopup}
+        resendOtp = {requestOTP}/> //remove the ProfileUpdate popup
     }
 </>
   )
