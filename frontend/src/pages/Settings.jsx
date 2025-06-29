@@ -4,6 +4,7 @@ import { SettingsIcon } from 'lucide-react'
 import ProfileView from '../components/modals/ProfileView'
 import ProfileUpdate from '../components/modals/ProfileUpdate';
 import TransactionOverview from '../components/modals/TransactionOverview'
+import SetMonthlyBudget from '../components/modals/SetMonthlyBudget';
 
 function Settings() {
 
@@ -81,6 +82,11 @@ function Settings() {
 {setting.path === '/transaction-status' && setting.isActive && 
 <TransactionOverview 
   hidePopup = {()=> setSetting({path: '/transaction-status', isActive: false})}/>}
+
+{/* set budget */}
+{setting.path === '/set-budget' && setting.isActive && 
+<SetMonthlyBudget 
+  hidePopup = {()=> setSetting({path: '/set-budget', isActive: false})}/>}
       
     </div>
   )
