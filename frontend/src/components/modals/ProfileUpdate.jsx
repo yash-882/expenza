@@ -10,6 +10,7 @@ function ProfileUpdate({heading, placeholder, description, closePopup}) {
     let [email, setEmail] = useState('')
     let [loading, setLoading] = useState(false)
     let [hidden, setHidden] = useState(false)
+    let [isOtpSent, setOtpSent] = useState(false)
 
     async function requestOTP(evt){
         evt.preventDefault()
@@ -38,6 +39,9 @@ function ProfileUpdate({heading, placeholder, description, closePopup}) {
 
             // hide current profile updation popup and show the OTP popup
             setHidden(true)
+
+            // otp sent
+            setOtpSent(true)
         }
         catch(err){
             setLoading(false) //remove loader
@@ -119,19 +123,23 @@ function ProfileUpdate({heading, placeholder, description, closePopup}) {
     </PopupWrapper>
 
     {/* show notification popup inside the current component only if there is any error occured */}
-    {notify && notificationInfo.type === 'error'  && <NotificationPopup 
+    {notify && <NotificationPopup 
     notificationInfo={notificationInfo} 
     removePopup={()=> setNotify(false)}/>}
 
 
-    {/* show OTP popup for OTP validation after sending OTP to the email*/}
+    {/* show popup for OTP validation only after sending the OTP to the new email*/}
     {
-        notificationInfo.type === 'success' && email && 
+        isOtpSent &&
         <OtpPopup
         notificationInfo={notificationInfo} // notificaton info
         notify={notify} // notification popup state
         removeNotificationPopup = {() => setNotify(false)}  //remove notification popup           
-        heading={'Enter OTP for email updation'} /> //OTP for ..
+        heading={'Enter OTP for email updation'}
+        sentTo = {email} //email that will receive the OTP
+        setNotificationInfo = {setNotificationInfo} //response message from the server
+        setNotify = {setNotify} //set message and its type
+        removeProfileUpdatePopup = {closePopup}/> //remove the ProfileUpdate popup
     }
 </>
   )
