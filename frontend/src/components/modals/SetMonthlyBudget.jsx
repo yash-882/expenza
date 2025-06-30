@@ -8,13 +8,37 @@ function SetMonthlyBudget({hidePopup}) {
     let [notify, setNotify] = useState(false)
     let [notificationInfo, setNotificationInfo] = useState({type: '', message: ''})
     let [loading, setLoading] = useState(false)
+     let [isChecked, setChecked] = useState(false) //state for confirming a warning
+
+    function handleCheck(evt){
+        // if warning is checked
+        if(evt.target.checked){
+            setChecked(true)
+        } 
+        // if warning is unchecked
+        else if(evt.target.checked == false){
+            setChecked(false)
+        } 
+        
+        else setChecked(false)
+    }
 
     async function handleSettingBudget(evt) {
         evt?.preventDefault()
+        // reset notification
+        setNotificationInfo({type: '', message: ''})
+        
+        // if the warning message is not checked
+        if(!isChecked){
 
+        //  state that contains error message
+        setNotificationInfo({type: 'error', message: 'You must acknowledge the warning first'})
+        // show popup
+        setNotify(true)
+        return;
+        }
+        
         try{
-            // reset notification
-            setNotificationInfo({type: '', message: ''})
             setLoading(true)
 
             // setting budget...
@@ -39,6 +63,7 @@ function SetMonthlyBudget({hidePopup}) {
 
         } catch(err){
             //  state that contains error message
+            setLoading(false)
             // 
              setNotificationInfo({
                 type: 'error', 
@@ -101,6 +126,12 @@ function SetMonthlyBudget({hidePopup}) {
                 </button>
 
             </div>
+
+{/* checkbox indicates that the client read the warning */}
+            <input 
+            type="checkbox" 
+            className='me-1'
+            onChange={handleCheck} />
                     
         {/* warning about transaction summary  */}
         <p 
