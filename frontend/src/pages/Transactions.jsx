@@ -429,7 +429,8 @@ import NotificationPopup from '../components/modals/NotificationPopup';
       hidePopup={() =>{ setTransacIDToDelete(''); setDeleteTransacPopup(false)}} 
       dataToDelete = {{apiPath: 'transaction', id: transacIDToDelete}}
       refetchData={fetchTransactions}
-      notifyPopup = {notifyPopup}/> : ''}
+      notifyPopup = {notifyPopup}
+      heading = 'Are you sure you want to delete it?'/> : ''}
 
         {/* notification message */}
      {notificationPopup && <NotificationPopup removePopup={()=>showNotificationPopup(false)} notificationInfo={notificationInfo}/>}

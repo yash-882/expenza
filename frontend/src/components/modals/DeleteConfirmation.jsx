@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import PopupWrapper from '../PopupWrapper'
 import axios from 'axios';
 
-function DeleteConfirmation({ hidePopup, dataToDelete, refetchData, notifyPopup }) {
+function DeleteConfirmation({ hidePopup, heading, dataToDelete, refetchData, notifyPopup }) {
     let [isDelete, setDeleteData] = useState(false);
     let [loading, setLoading] = useState(false)
     let isNotified = false
@@ -64,7 +64,7 @@ function DeleteConfirmation({ hidePopup, dataToDelete, refetchData, notifyPopup 
 
                 {/* confirmation message */}
                 <p className='fw-bold fs-5  mb-4 border-bottom border-secondary pb-3'>
-                    Are you sure you want to delete it permanantely?
+                    {heading}
                 </p>
 
 
@@ -76,7 +76,7 @@ function DeleteConfirmation({ hidePopup, dataToDelete, refetchData, notifyPopup 
                         Cancel
                     </button>
 
-                    {/* delete transaction button 🔴*/}
+                    {/* delete button 🔴*/}
                     <button
                         className='btn btn-danger'
                         onClick={() => setDeleteData(true)}>
