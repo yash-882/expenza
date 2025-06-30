@@ -7,6 +7,8 @@ import ProfileView from '../components/modals/ProfileView'
 import ProfileUpdate from '../components/modals/ProfileUpdate';
 import TransactionOverview from '../components/modals/TransactionOverview'
 import SetMonthlyBudget from '../components/modals/SetMonthlyBudget';
+import DeleteConfirmation from '../components/modals/DeleteConfirmation';
+import NotificationPopup from '../components/modals/NotificationPopup';
 
 function Settings() {
   
@@ -21,6 +23,27 @@ function Settings() {
 
  // state for select individual setting
   const [setting, setSetting] = useState({path: '', isActive: false});
+
+    // state for displaying popups
+   let [notificationPopup, showNotificationPopup] = useState(false)
+  
+    // state typically for error messages
+    let [notificationInfo, setNotificationInfo] = useState({
+                type: '', 
+                message: '',
+            });
+
+            // notify popup
+        function notifyPopup({type, message}){
+          // set message 
+          setNotificationInfo({
+            type: type,
+            message: message
+          })
+        
+          // show notification popup
+          showNotificationPopup(true)
+        }
 
   function handleSettingClick(event) {
     //  get clicked button id
@@ -68,6 +91,12 @@ function Settings() {
         
         </div>
 ))}
+{/* notification popup */}
+{notificationPopup && <NotificationPopup 
+removePopup={()=>showNotificationPopup(false)} 
+notificationInfo={notificationInfo}
+/>}
+
 {/* show account details */}
 {setting.path === '/account-details' && setting.isActive && 
 <ProfileView closePopup={()=> setSetting({path: '/account-details', isActive: false})}/>}
@@ -98,6 +127,17 @@ function Settings() {
 {setting.path === '/set-budget' && setting.isActive && 
 <SetMonthlyBudget 
   hidePopup = {()=> setSetting({path: '/set-budget', isActive: false})}/>}
+
+{/* clear all transactions */}
+{setting.path === '/clear-all-transactions' && setting.isActive && 
+<DeleteConfirmation 
+  hidePopup = {()=> setSetting({path: '/clear-all-transactions', isActive: false})}
+  heading= 'Delete all transactions?'
+  dataToDelete={{apiPath: 'transaction', id: 'delete'}}
+  notifyPopup={notifyPopup}
+  
+  // do nothing
+  refetchData={() => {}}/>}
       
     </div>
   )
