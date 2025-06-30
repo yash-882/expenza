@@ -162,16 +162,26 @@ const verifyNewEmail = wrapper(async (req, res, next) => {
             message: 'Invalid Email format!'
         }, 400))
     }
-    
+
+    // OTP stored in DB
+    const OTPInDB = req.OTPDetails;
+
+    // check if the OTP already requested for another email
+    if(OTPInDB && OTPInDB.newEmail !== body.newEmail){
+        return next(new CustomError({
+            name: 'BadRequestError',
+            message: 'OTP already requested for another email'
+        }))
+    }
+
     //generate 6 digits OTP
     const OTP = Math.floor(Math.random() * 900000) + 100000;
     // hashing OTP...
     const hashedOTP = await bcrypt.hash(String(OTP), 10)
     
-    // if OTP is resended
-    const isAlreadyRequested = req.OTPDetails;
 
-    if (isAlreadyRequested) {
+    // check if the OTP is already requested
+    if (OTPInDB) {
         // updating OTP...
         await OTPModel.updateOne({ email: user.email }, 
             {"$set":{otp: hashedOTP},
