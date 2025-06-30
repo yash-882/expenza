@@ -547,5 +547,5 @@ export default {
     resetPassword,
     changePassword,
     limitOTPAttempts,
-    limitOTPRequests
+    limitOTPRequests,
 }

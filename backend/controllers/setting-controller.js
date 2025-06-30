@@ -378,6 +378,35 @@ const changeName = wrapper(async(req, res, next) => {
     })
 })
 
+// verify password before perfoming any sensitive action
+const verifyPassword = wrapper(async (req, res, next) => {
+    const {password: enteredPassword} = req.body //extract password
+    const user = req.user; //user
+
+    // if password is not provided
+    if(!enteredPassword){
+        return next(new CustomError({
+            name: 'BadRequestError',
+            message: 'Please enter the password'
+        }, 400))
+    }
+
+     // compare the encrypted password with entered password
+    const isCorrect = await bcrypt.compare(enteredPassword, user.password)
+
+    if(!isCorrect){
+        return next(new CustomError({
+            name: 'UnauthorizedError',
+            message: 'Incorrect password!'
+        }, 401))
+    } 
+
+    sendResponse(res, {
+        message: 'Password is correct'
+    })
+
+})
+
 // returns transaction status of current month 
 // (also returns a detailed overview)
 const transactionStatus = wrapper(async(req, res, next) => {
@@ -465,5 +494,6 @@ export default {
     setBudget,
     resetBudget,
     changeName,
-    transactionStatus
+    transactionStatus,
+    verifyPassword
 }

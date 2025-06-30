@@ -47,5 +47,9 @@ settingRouter.route('/change-name')
 settingRouter.route('/transaction-status')
 .get(settingController.transactionStatus)
 
+// verify password (for confirmation before sensitive actions)
+settingRouter.route('/verify-password')
+.post(settingController.verifyPassword)
+
 
 export default settingRouter;
