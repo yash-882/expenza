@@ -9,6 +9,7 @@ import TransactionOverview from '../components/modals/TransactionOverview'
 import SetMonthlyBudget from '../components/modals/SetMonthlyBudget';
 import DeleteConfirmation from '../components/modals/DeleteConfirmation';
 import NotificationPopup from '../components/modals/NotificationPopup';
+import ChangePassword from '../components/modals/ChangePassword';
 
 function Settings() {
   
@@ -127,6 +128,11 @@ notificationInfo={notificationInfo}
 {setting.path === '/set-budget' && setting.isActive && 
 <SetMonthlyBudget 
   hidePopup = {()=> setSetting({path: '/set-budget', isActive: false})}/>}
+
+{/* Change password */}
+{setting.path === '/change-password' && setting.isActive && 
+<ChangePassword 
+  hidePopup = {()=> setSetting({path: '/change-password', isActive: false})}/>}
 
 {/* clear all transactions */}
 {setting.path === '/clear-all-transactions' && setting.isActive && 
