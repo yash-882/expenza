@@ -2,6 +2,7 @@ import React, {useState} from 'react'
 import PopupWrapper from '../PopupWrapper'
 import axios from 'axios'
 import NotificationPopup from './NotificationPopup'
+import { Eye, EyeClosed } from 'lucide-react'
 
 function ChangePassword({closePopup}) {
     let [loading, setLoading] = useState(false)
@@ -21,6 +22,8 @@ function ChangePassword({closePopup}) {
         newPassword: '',
         confirmPassword: ''
     })
+    
+    let [isPasswordVisible, setPassVisibility] = useState(false);
 
     function handleInputs(evt){
         const inputID = evt.target.id;
@@ -104,14 +107,29 @@ function ChangePassword({closePopup}) {
                 />
                {/* input to new password */}
                 <input 
-                type="password"
+                type={isPasswordVisible ? 'text' : 'password'}
                 id='newPassword'
                 onChange = {handleInputs}
                 value= { credentials.newPassword }
-                className=' rounded-3 p-2 mb-3 w-100 border-0'
+                className=' rounded-3 p-2 mb-1 w-100 border-0'
                 style={{outline: "solid 3px rgb(157, 181, 218)"}}
                 placeholder='Create new password'
                 />
+                {<button 
+                type='button'
+                className='btn btn-sm mb-3'
+                onClick={() => setPassVisibility(v => !v)}>
+                    
+                        {
+                            isPasswordVisible ? 
+                            // icon when password is visible
+                          <> Hide password <EyeClosed className='ms-1'/> </> 
+                            : 
+                            // icon when password is hidden
+                        <> Show password<Eye className='ms-1'/> </>
+                        }
+   
+                </button>}
                {/* input to confirm the new password */}
                 <input 
                 type="password"
