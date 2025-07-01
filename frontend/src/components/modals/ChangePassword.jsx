@@ -1,9 +1,78 @@
 import React, {useState} from 'react'
 import PopupWrapper from '../PopupWrapper'
+import axios from 'axios'
+import NotificationPopup from './NotificationPopup'
 
 function ChangePassword({closePopup}) {
+    let [loading, setLoading] = useState(false)
 
-        let [loading, setLoading] = useState(false)
+        // state for displaying popups
+    let [notificationPopup, showNotificationPopup] = useState(false)
+      
+        // state for error or success messages
+    let [notificationInfo, setNotificationInfo] = useState({
+                    type: '', 
+                    message: '',
+        });
+
+    // password 
+    let [credentials, setCredentials] = useState({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+    })
+
+    function handleInputs(evt){
+        const inputID = evt.target.id;
+
+        // set password 
+        setCredentials((prev)=> ({...prev, [inputID]: evt.target.value}))
+    }
+
+    async function changeUserPassword(evt){
+        evt.preventDefault()
+
+        try{
+            setLoading(true) // show loading...
+
+            const response = await axios.patch('http://192.168.1.7:8000/api/user/setting/change-password', 
+                credentials, //body
+                {withCredentials: true}
+            );
+
+            // remove loading
+            setLoading(false)
+
+            // api reponse
+            const apiResponse = response.data
+
+            // create success message
+            setNotificationInfo({type: 'success', message: apiResponse.message})
+
+            // show popup
+            showNotificationPopup(true)
+
+            // close change-password popup after 3 seconds
+            setTimeout(() => {
+                closePopup()
+            }, 3000)
+        }
+
+        catch(err){
+
+            // remove loading
+            setLoading(false)
+
+           // create error message
+            setNotificationInfo({
+                type: 'error', 
+                message: err.response?.data.message || 'Server error, please try again later'
+            })
+
+            // show popup
+            showNotificationPopup(true)
+        }
+    }
 
   return (<>
 
@@ -14,7 +83,9 @@ function ChangePassword({closePopup}) {
     className={`p-4 d-flex flex-column bg-light  justify-content-center align-items-center rounded-4`}>
 
 {/* change password form */}
-        <form className='w-100 d-flex flex-column' onSubmit>
+        <form 
+        className='w-100 d-flex flex-column' 
+        onSubmit = {changeUserPassword}>
 
 {/* label for changing password */}
            
@@ -24,8 +95,9 @@ function ChangePassword({closePopup}) {
                {/* input to enter current password */}
                 <input 
                 type="password"
-                onChange
-                value='' 
+                onChange = { handleInputs }
+                id = 'currentPassword'
+                value= { credentials.currentPassword } 
                 className=' rounded-3 p-2 mb-3 w-100 border-0'
                 style={{outline: "solid 3px rgb(157, 181, 218)"}}
                 placeholder='Enter current password'
@@ -33,8 +105,9 @@ function ChangePassword({closePopup}) {
                {/* input to new password */}
                 <input 
                 type="password"
-                onChange
-                value=''
+                id='newPassword'
+                onChange = {handleInputs}
+                value= { credentials.newPassword }
                 className=' rounded-3 p-2 mb-3 w-100 border-0'
                 style={{outline: "solid 3px rgb(157, 181, 218)"}}
                 placeholder='Create new password'
@@ -42,8 +115,9 @@ function ChangePassword({closePopup}) {
                {/* input to confirm the new password */}
                 <input 
                 type="password"
-                onChange
-                value=''
+                id='confirmPassword'
+                onChange = {handleInputs}
+                value= { credentials.confirmPassword }
                 className=' rounded-3 p-2 mb-3 w-100 border-0'
                 style={{outline: "solid 3px rgb(157, 181, 218)"}}
                 placeholder='Confirm new password'
@@ -92,6 +166,12 @@ function ChangePassword({closePopup}) {
     </div>
 
     </PopupWrapper>
+
+    {/* show error or success popup */}
+    {notificationPopup && 
+<NotificationPopup 
+notificationInfo={notificationInfo} removePopup={()=> showNotificationPopup(false)}/>
+}
     </>
   )
 }

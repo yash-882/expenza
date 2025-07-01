@@ -132,7 +132,7 @@ notificationInfo={notificationInfo}
 {/* Change password */}
 {setting.path === '/change-password' && setting.isActive && 
 <ChangePassword 
-  hidePopup = {()=> setSetting({path: '/change-password', isActive: false})}/>}
+  closePopup = {()=> setSetting({path: '/change-password', isActive: false})}/>}
 
 {/* clear all transactions */}
 {setting.path === '/clear-all-transactions' && setting.isActive && 
