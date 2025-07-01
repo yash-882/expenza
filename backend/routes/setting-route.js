@@ -21,7 +21,7 @@ settingRouter.route('/change-email')
 
 // logout account
 settingRouter.route('/logout')
-.get(settingController.logout)
+.post(settingController.logout)
 
 // account details
 settingRouter.route('/account-details')
