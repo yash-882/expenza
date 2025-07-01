@@ -15,12 +15,9 @@ function DeleteConfirmation({ hidePopup, heading, dataToDelete, refetchData, not
                 message: ''
             })
             setLoading(true) //show loading  
-            console.log(`http://192.168.1.7:8000/api/${dataToDelete.apiPath}/${dataToDelete.id}`);
             
-
             await axios.delete(`http://192.168.1.7:8000/api/${dataToDelete.apiPath}/${dataToDelete.id}`,
                 { withCredentials: true })
-
 
             setLoading(false)
 

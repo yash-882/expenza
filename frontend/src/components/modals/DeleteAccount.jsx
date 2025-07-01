@@ -1,10 +1,47 @@
 import React, { useState } from 'react'
 import PopupWrapper from '../PopupWrapper'
+import axios from 'axios';
+import NotificationPopup from './NotificationPopup';
 
 function DeleteAccount({closePopup}) {
 
     let [password, setPassword] = useState('');
     let [loading, setLoading] = useState(false)
+
+    
+         // state for displaying popups
+  let [notificationPopup, showNotificationPopup] = useState(false)
+        
+          // state for error or success messages
+  let [notificationInfo, setNotificationInfo] = useState({
+          type: '', 
+          message: '',
+      });
+
+    async function verifyPassword(evt){
+        evt.preventDefault();
+        try{
+            setLoading(true) //show loading...
+            // verifying password...
+            await axios.post('http://192.168.1.7:8000/api/user/setting/verify-password',
+                {password}, //user's password
+                {withCredentials: true}
+            )
+            setLoading(false) //remove loading 
+
+        } 
+        catch(err){
+            setLoading(false) //remove loading
+            
+            //  state that contains failure message
+            setNotificationInfo({type: 'error', 
+                message: err.response?.data.message || 'Server error, please try again later'})
+                
+         // show notification popup
+            showNotificationPopup(true)
+
+        }
+    }
 
   return (
 <PopupWrapper>
@@ -38,6 +75,7 @@ function DeleteAccount({closePopup}) {
             <button
             disabled={loading}
             type='submit'
+            onClick={verifyPassword}
             className='text-white d-flex justify-content-center align-items-center btn fw-bold bg-danger mb-2 rounded-3 border-0'>
 
                 {loading ? 
@@ -62,6 +100,12 @@ function DeleteAccount({closePopup}) {
 
             </div>
     </div>
+
+{/* error or success message */}
+    {notificationPopup &&
+    <NotificationPopup
+    notificationInfo={notificationInfo}
+    removePopup={()=> showNotificationPopup(false)} />}
 </PopupWrapper>
   )
 }
