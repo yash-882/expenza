@@ -11,6 +11,7 @@ import DeleteConfirmation from '../components/modals/DeleteConfirmation';
 import NotificationPopup from '../components/modals/NotificationPopup';
 import ChangePassword from '../components/modals/ChangePassword';
 import DeleteAccount from '../components/modals/DeleteAccount';
+import LogOut from '../components/modals/LogOut'
 
 function Settings() {
   
@@ -150,6 +151,11 @@ notificationInfo={notificationInfo}
 {setting.path === '/delete-account' && setting.isActive && 
 <DeleteAccount
 closePopup={()=> setSetting({path: '/delete-account', isActive: false})}/>}
+
+{/* logout user */}
+{setting.path === '/logout' && setting.isActive && 
+<LogOut
+closePopup={()=> setSetting({path: '/logout', isActive: false})}/>}
       
     </div>
   )
