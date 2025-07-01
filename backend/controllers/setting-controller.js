@@ -477,6 +477,7 @@ const transactionStatus = wrapper(async(req, res, next) => {
                 isLimitExceeded:  totalExpense > monthlyBudget,
                 totalExpense,
                 isBudgetSet: monthlyBudget ? true : false,
+                monthlyBudget,
                 totalIncome,
                 eachCategoryTotal
             }

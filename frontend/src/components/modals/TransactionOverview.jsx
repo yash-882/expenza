@@ -1,27 +1,56 @@
-import React from 'react'
 import PopupWrapper from '../PopupWrapper';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
+import NotificationPopup from './NotificationPopup';
 
 
 function TransactionOverview({hidePopup}) {
 
-  const [overview, setOverview] = React.useState({});
+  const [overview, setOverview] = useState({});
+  let [loading, setLoading ] = useState(false);
+
+         // state for displaying popups
+  let [notificationPopup, showNotificationPopup] = useState(false)
+        
+          // state for error or success messages
+  let [notificationInfo, setNotificationInfo] = useState({
+          type: '', 
+          message: '',
+      });
 
   async function fetchTransactionOverview(){
+
+    try{
+
+    setLoading(true) //loading in process...
 
     // fetching API...
     const result = await axios.get('http://192.168.1.7:8000/api/user/setting/transaction-status', {
       withCredentials: true //set credentials
     })
 
+    setLoading(false) //remove loading
+
     // API response
     const apiResponse = result.data
 
     // set data of transaction overview
     setOverview(apiResponse.data)
+  } 
+  catch(err){
+         // remove loading
+            setLoading(false)
+
+           // create error message
+            setNotificationInfo({
+                type: 'error', 
+                message: err.response?.data.message || 'Server error, please try again later'
+            })
+
+            // show popup
+            showNotificationPopup(true)
   }
-  console.log(overview);
+  }
   
   useEffect(()=> {
     // fetching data...
@@ -40,7 +69,12 @@ function TransactionOverview({hidePopup}) {
             {/* heading */}
       <div className="col-11 d-flex border-bottom border-secondary flex-column">
         <h5 
-        className="text-black mb-1">Transaction Summary 📊</h5>
+        className="text-black mb-1 fw-bold">
+           {
+            //  show loader when api request is in process
+          loading ? <p className='loader mb-0 ' style={{height: '30px', width:'30px'}}>
+          </p>: 'Transaction Summary 📊' }
+          </h5>
 
 
              {/*(heading)  */}
@@ -63,6 +97,16 @@ function TransactionOverview({hidePopup}) {
             { overview.isLimitExceeded ? 'Spending Limit exceeded!': 'Spending Limit available' }
           </span>
           </span> : ''
+           } 
+
+         {/* Show monthly budget  */}
+          {
+            <p className='text-black'>
+            Monthly budget: 
+            <span className='fw-bold'>
+           {   overview.isBudgetSet ? ' ₹' + overview.monthlyBudget : ' Not set'}
+            </span>
+            </p>
            } 
            
       </div>
@@ -104,7 +148,11 @@ function TransactionOverview({hidePopup}) {
 
       </div>
        </div>
-  
+
+       {notificationPopup && 
+       <NotificationPopup 
+       removePopup={()=> showNotificationPopup(false)}
+       notificationInfo={notificationInfo}/>}
   
 </PopupWrapper>
   )
