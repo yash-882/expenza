@@ -10,6 +10,7 @@ import SetMonthlyBudget from '../components/modals/SetMonthlyBudget';
 import DeleteConfirmation from '../components/modals/DeleteConfirmation';
 import NotificationPopup from '../components/modals/NotificationPopup';
 import ChangePassword from '../components/modals/ChangePassword';
+import DeleteAccount from '../components/modals/DeleteAccount';
 
 function Settings() {
   
@@ -144,6 +145,11 @@ notificationInfo={notificationInfo}
   
   // do nothing
   refetchData={() => {}}/>}
+
+{/* delete account */}
+{setting.path === '/delete-account' && setting.isActive && 
+<DeleteAccount
+closePopup={()=> setSetting({path: '/delete-account', isActive: false})}/>}
       
     </div>
   )
