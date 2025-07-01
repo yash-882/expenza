@@ -1,8 +1,50 @@
-import React, {useState} from 'react'
+import React, {useContext, useState} from 'react'
 import PopupWrapper from '../PopupWrapper'
+import {UserContext} from '../../contexts/UserContext'
+import axios from 'axios'
+import NotificationPopup from './NotificationPopup'
 
 function LogOut({closePopup}) {
     let [loading, setLoading] = useState(false)
+
+      let {setIsAuthenticated} = useContext(UserContext)
+             // state for displaying popups
+      let [notificationPopup, showNotificationPopup] = useState(false)
+            
+              // state for error or success messages
+      let [notificationInfo, setNotificationInfo] = useState({
+              type: '', 
+              message: '',
+          });
+
+        async function logOutUser(){
+            try{
+                setLoading(true) //show loading...
+
+                // logging out...
+                await axios.post('http://192.168.1.7:8000/api/user/setting/logout',
+                       {}, {withCredentials: true}
+                   )
+            setLoading(false) //remove loading
+
+            // this will redirect the user to /login page
+            setIsAuthenticated(false)
+
+            } 
+            catch(err){
+
+            setLoading(false) //remove loading
+
+                // set error properties
+                setNotificationInfo({
+                    type: 'error',
+                    message: err.response?.data?.message || 'Server error, please try again later'
+                })
+
+                // show popup
+                showNotificationPopup(true)
+            }
+        }
 
   return (
          <PopupWrapper>
@@ -25,7 +67,8 @@ function LogOut({closePopup}) {
                     {/* logout button */}
                     <button
                         className='btn btn-danger'
-                        disabled={loading}>
+                        disabled={loading}
+                        onClick={logOutUser}>
                         {/* loader */}
                         <p
                             className={`${loading ? 'd-block' : 'd-none'} loader mb-1 text-center`}
@@ -37,10 +80,13 @@ function LogOut({closePopup}) {
                     </button>
 
                 </div>
-
-
-
             </div>
+
+{/* show reponse */}
+            {notificationPopup && 
+            <NotificationPopup
+            notificationInfo={notificationInfo}
+            removePopup={() => showNotificationPopup(false)}/>}
         </PopupWrapper>
   )
 }
