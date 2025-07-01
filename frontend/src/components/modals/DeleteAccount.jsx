@@ -1,14 +1,16 @@
-import React, { useState } from 'react'
+import React, { useState, useContext } from 'react'
 import PopupWrapper from '../PopupWrapper'
 import axios from 'axios';
 import NotificationPopup from './NotificationPopup';
+import DeleteConfirmation from './DeleteConfirmation'
+import {UserContext} from '../../contexts/UserContext'
 
 function DeleteAccount({closePopup}) {
 
     let [password, setPassword] = useState('');
     let [loading, setLoading] = useState(false)
-
-    
+    let [hidden, setHidden] = useState(false)
+    let {setIsAuthenticated} = useContext(UserContext)
          // state for displaying popups
   let [notificationPopup, showNotificationPopup] = useState(false)
         
@@ -17,6 +19,24 @@ function DeleteAccount({closePopup}) {
           type: '', 
           message: '',
       });
+
+    //   handles the server response (error or success)
+      function notifyPopup({type, message}){
+
+        // if deletion of the account was successful
+        if(type === 'success')
+            // this will redirect the user to /login page
+            setIsAuthenticated(false)
+
+            // show error 
+        else if(type === 'error'){
+            // set error properties
+            setNotificationInfo({type, message})
+            // show popup
+            showNotificationPopup(true)
+        }
+
+      }
 
     async function verifyPassword(evt){
         evt.preventDefault();
@@ -28,6 +48,7 @@ function DeleteAccount({closePopup}) {
                 {withCredentials: true}
             )
             setLoading(false) //remove loading 
+            setHidden(true) //hidden the current popup and show delete confirmation popup(child)
 
         } 
         catch(err){
@@ -44,7 +65,7 @@ function DeleteAccount({closePopup}) {
     }
 
   return (
-<PopupWrapper>
+<PopupWrapper hidden = {hidden}>
     <div
     className={`p-4 d-flex flex-column bg-light  justify-content-center rounded-4`}>
 
@@ -106,6 +127,22 @@ function DeleteAccount({closePopup}) {
     <NotificationPopup
     notificationInfo={notificationInfo}
     removePopup={()=> showNotificationPopup(false)} />}
+
+{   
+
+// delete confirmation popup
+hidden && 
+<DeleteConfirmation
+heading= "Are you sure you want to delete your account?"
+hidePopup={()=> setHidden(false)}
+dataToDelete={{apiPath: 'user/setting', id : 'delete-account'}}
+
+// this function only displays popup on account deletion error
+notifyPopup={notifyPopup}
+//do nothing
+refetchData={()=> {}}/>
+
+}
 </PopupWrapper>
   )
 }
