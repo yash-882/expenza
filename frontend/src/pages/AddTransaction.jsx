@@ -295,6 +295,7 @@ function AddTransaction() {
                                 {/* button for submit transaction */}
                                 <button
                                     type='submit'
+                                    disabled={loading}
                                     className='btn w-100 fw-bold text-white d-flex justify-content-center submit-transaction-btn'>
 
                                     {/* loader */}

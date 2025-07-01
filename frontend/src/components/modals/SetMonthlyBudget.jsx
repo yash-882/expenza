@@ -101,7 +101,8 @@ function SetMonthlyBudget({hidePopup}) {
             {/* button container */}
             <div className='btn-block mb-3 w-100 d-flex flex-wrap flex-column justify-content-between'>
                 {/* submit budget amount */}
-                <button 
+                <button
+                disabled={loading} 
                 className="btn btn-primary fw-bold mb-2 d-flex justify-content-center align-items-center">
                     {/* loader */}
                     {

@@ -148,6 +148,7 @@ function ChangePassword({closePopup}) {
 
 {/* submit button */}
             <button
+            disabled={loading}
             type='submit'
             className='text-white d-flex justify-content-center align-items-center btn fw-bold bg-primary mb-2 rounded-3 border-0'>
 

@@ -118,6 +118,7 @@ function Login() {
         {/* submit button */}
         <button 
         type='submit'
+        disabled={loading}
         className='btn text-white d-flex justify-content-center text-center login-btn mb-3 rounded-3 fw-bolder'>
    
           <p 

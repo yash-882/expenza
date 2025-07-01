@@ -147,8 +147,8 @@ function ProfileUpdate({heading, placeholder, action, description, closePopup}) 
 {/* submit button */}
             <button
             type='submit'
-            className='text-white d-flex justify-content-center align-items-center btn fw-bold bg-primary mb-2 rounded-3 border-0'>
-
+            className='text-white d-flex justify-content-center align-items-center btn fw-bold bg-primary mb-2 rounded-3 border-0'
+            disabled={loading}>
                 {loading ? 
                 // show loading...
                 <p 

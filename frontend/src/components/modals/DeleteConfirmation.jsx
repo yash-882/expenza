@@ -81,6 +81,7 @@ function DeleteConfirmation({ hidePopup, heading, dataToDelete, refetchData, not
                     {/* delete button 🔴*/}
                     <button
                         className='btn btn-danger'
+                        disabled={loading}
                         onClick={() => setDeleteData(true)}>
                         {/* loader */}
                         <p
