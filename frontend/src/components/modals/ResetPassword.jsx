@@ -153,6 +153,8 @@ function ResetPassword({closePopup}) {
         setNotify={showNotificationPopup}
         notify={notificationPopup}
         resendOtp={requestOTP}
+        action='ResetPassword'
+        removeProfileUpdatePopup={closePopup}
         />
     
     }
