@@ -5,7 +5,7 @@ import axios from 'axios'
 
 function OtpPopup(
   {heading, notify, setNotify, removeNotificationPopup, 
-    notificationInfo, setNotificationInfo, removeProfileUpdatePopup, sentTo, resendOtp}) {
+    notificationInfo, setNotificationInfo, removeProfileUpdatePopup, sentTo, resendOtp, action}) {
 
     let [otp, setOtp] = useState('')
     let [sendAgain, setSendAgain] = useState(0)
@@ -48,6 +48,17 @@ function OtpPopup(
     }
   }
 
+
+  // for storing functions for multiple fields because 
+  //each field has its own path and logic
+  
+  const OTP_DELIVERY_FOR = {
+        // email updation
+        EmailUpdation: validateOTPAndUpdate
+      
+  }
+
+
   // resend OTP
   useEffect(()=> {
     
@@ -85,7 +96,7 @@ async function execute(){
     
         {/* OTP form */}
         <form 
-        onSubmit={validateOTPAndUpdate}>
+        onSubmit={OTP_DELIVERY_FOR[action]}>
                 <input
                 className='p-2 border-0 rounded-3 w-100 mb-4'
                 placeholder='Enter OTP'

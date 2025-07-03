@@ -194,7 +194,8 @@ function ProfileUpdate({heading, placeholder, action, description, closePopup}) 
         setNotificationInfo = {setNotificationInfo} //response message from the server
         setNotify = {setNotify} //set message and its type
         removeProfileUpdatePopup = {closePopup}
-        resendOtp = {requestOTP}/> //remove the ProfileUpdate popup
+        resendOtp = {requestOTP}
+        action='EmailUpdation'/> //remove the ProfileUpdate popup
     }
 </>
   )
