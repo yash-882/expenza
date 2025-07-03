@@ -3,6 +3,7 @@ import React, { useContext, useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { UserContext } from '../contexts/UserContext'
 import { Eye, EyeOff } from 'lucide-react'
+import ResetPassword from '../components/modals/ResetPassword'
 
 
 function Login() {
@@ -13,6 +14,7 @@ function Login() {
     let [loading, setLoading] = useState(false)
     let {isAuthenticated, setIsAuthenticated} = useContext(UserContext)
     let [showPassword, setShowPassword] = useState(false)
+    let [resetPassPopup, setResetPassPopup] = useState(false)
     let navigate = useNavigate()
 
     function handleShowPassword (evt){
@@ -131,9 +133,12 @@ function Login() {
         </button>
 
 {/* reset password */}
-        <Link href="#" className='nav-link text-primary'>
+        <button
+        type='button'
+        onClick={()=> setResetPassPopup(true)} 
+        className='nav-link text-primary'>
         Reset password
-        </Link>
+        </button>
 
         {/* sign up link */}
         <Link to= '/sign-up' className='nav-link text-primary'>
@@ -145,6 +150,9 @@ function Login() {
 
       
 </div>
+{resetPassPopup && 
+<ResetPassword 
+closePopup={()=> setResetPassPopup(false)}/>}
     </div>
   )
 }
