@@ -21,7 +21,7 @@ function ResetPassword({closePopup}) {
 
     async function requestOTP(evt){
 
-        evt.preventDefault()
+        evt?.preventDefault()
         setLoading(true) //show loading
             try{
                 // send OTP to email for resetting the password...

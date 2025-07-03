@@ -59,13 +59,11 @@ function OtpPopup(
 
     try{
       // send OTP for validation...
-   const response = await axios.post('http://192.168.1.7:8000/api/auth/reset-password-otp/submit', 
+     await axios.post('http://192.168.1.7:8000/api/auth/reset-password-otp/submit', 
     {otp}, {withCredentials: true} //otp
   )
 
     setLoading(false) //remove loading
-
-    const apiResponse = response.data;
 
     setAllowResetPass(true) //allowing user to proceed further for resetting the pass
 
@@ -94,6 +92,8 @@ function OtpPopup(
   const OTP_DELIVERY_FOR = {
         // email updation
         EmailUpdation: validateOTPAndUpdate,
+
+        // reset password
         ResetPassword: validateOTPForResetPass
       
   }
@@ -106,9 +106,12 @@ async function execute(){
   // if client wants to request OTP again
       if(sendAgain){
         setLoading(true) //show loading...
+        console.log('hey');
+        
 
         // re-sending OTP... 
        await resendOtp()
+console.log('heyyy');
 
         setLoading(false) //remove loading
     }
