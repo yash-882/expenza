@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import PopupWrapper from '../PopupWrapper'
 import NotificationPopup from './NotificationPopup'
 import axios from 'axios'
+import ChangePassword2 from './ChangePassword2'
 
 function OtpPopup(
   {heading, notify, setNotify, removeNotificationPopup, 
@@ -190,6 +191,12 @@ async function execute(){
     notificationInfo={notificationInfo}/>}
     </PopupWrapper>
 
+    {/* show form to input a new password */}
+    {
+      allowResetPass && 
+      <ChangePassword2
+      closePopup={removeProfileUpdatePopup}/>
+    }
 
 </>
   )
