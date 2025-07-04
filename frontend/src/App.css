@@ -59,6 +59,11 @@ body{
 }
 
 /* transaction card options */
+.transaction-card-opt{
+  font-size: 14px;  color: rgb(178, 178, 255) !important;
+}
+
+/* transaction card options */
 .transaction-card-options{
   font-size: 14px;
   color: rgb(178, 178, 255) !important;
@@ -320,11 +325,6 @@ body{
   font-size: 16px;
 }
 
-/* transaction card options */
-.transaction-card-opt{
-  font-size: 14px;
-  color: rgb(178, 178, 255) !important;
-}
 
 /* transaction date added */
 .transaction-date{
