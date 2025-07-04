@@ -75,10 +75,18 @@ function Login() {
 
 
 {/* Login form */}
-<div className="d-flex justify-content-center login-form py-5 px-4 align-items-center rounded-4 mt-5 flex-column">
+<div
+style={{boxShadow: '0px 0px 4px gray'}} 
+className="d-flex  h-100 justify-content-center login-form py-5 px-4 align-items-center rounded-3 mt-5 flex-column">
+        
 
              {/* heading */}
-      <h4 className='fw-bolder mb-4'>Login to Expenza</h4>
+      <h3 className='fw-bolder mb-2 text-black'>Login to Expenza</h3>
+      <p 
+      className='mb-4 fw-bold text-white py-1 px-2 rounded-2 bg-opacity-75 bg-primary'>
+      { 'Your Personal Expense Tracker )' }
+        </p>
+
   
   {/* err message if occurs */}
         <p className={`${errMessage ? 'visible': 'invisible'} text-danger`}>
@@ -87,7 +95,7 @@ function Login() {
 
 
     {/* login form */}
-    <form onSubmit={handleLogin} className="d-flex justify-content-center  align-items-center flex-column">
+    <form onSubmit={handleLogin} className="d-flex h-100 justify-content-center  align-items-center flex-column">
 
         {/* input email */}
     <input 
