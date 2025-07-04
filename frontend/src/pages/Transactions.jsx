@@ -1,21 +1,15 @@
-    import React, { useContext, useEffect, useState } from 'react'
-    import {Settings2Icon , CalendarArrowDown, BadgeJapaneseYenIcon } from 'lucide-react'
+    import React, { useEffect, useState } from 'react'
+    import {Settings2Icon , CalendarArrowDown } from 'lucide-react'
     import axios from 'axios'
     import TransactionOverview from '../components/modals/TransactionOverview';
     import getReadableDate from '../utils/functions/readable-date';
     import TransactionFilters from '../components/modals/TransactionFilters'
     import { transactionCategories } from '../constants/transactions/transaction-categories';
-    import { UserContext } from '../contexts/UserContext';
-    import { Navigate, useNavigate } from 'react-router-dom';
 import DeleteConfirmation from '../components/modals/DeleteConfirmation';
 import NotificationPopup from '../components/modals/NotificationPopup';    
     
     function Transactions() {
-  
-      // user's authentication status
-      const {isAuthenticated, setIsAuthenticated} = useContext(UserContext)
-      const navigate = useNavigate()
-      
+
         let [transactionData, setTransactionData] = useState([])
 
         // messages that comes along with the data or if no data found
@@ -242,13 +236,6 @@ import NotificationPopup from '../components/modals/NotificationPopup';
         }   
         }
 
-        useEffect(() => {
-          // redirect to '/login' if not authenticated
-          if(!isAuthenticated)
-            navigate('/login')
-
-        }, [isAuthenticated])
-          
           
           useEffect(()=> {
           // sort order of transactions...

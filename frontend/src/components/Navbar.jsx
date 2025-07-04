@@ -1,5 +1,5 @@
 import { useContext, useEffect, useRef, useState } from 'react'
-import {Link} from "react-router-dom"
+import {Link, useLocation} from "react-router-dom"
 import { NavLinks } from '@constants/nav-bar/links.js';
 import ExpenzaLogo from "@assets/images/EXPENZA-LOGO.png"
 import { UserContext } from '../contexts/UserContext';
@@ -9,11 +9,21 @@ import { UserCircle2 } from "lucide-react"
 function Navbar({setNavbarRef}) {
 
   let navbarRef = useRef(null)
-  let {isAuthenticated, setIsAuthenticated} = useContext(UserContext)
+  let {isAuthenticated} = useContext(UserContext)
+  let location = useLocation()
   
   // returns the pathname of url (using for only highlighting the active tab on the first render)
-  let [activeTab, setActiveTab] = useState(window.location.pathname); 
+  let [activeTab, setActiveTab] = useState(location.pathname); 
   
+  // whenever user switch to another route(/add-transaction, /settings, etc), 
+  // the location updates, useEffect triggers and update the activeTab
+useEffect(() => {
+
+  // set active tab
+  setActiveTab(location.pathname)
+
+}, [location.pathname])
+
 
 useEffect(() => {
 
@@ -72,7 +82,7 @@ useEffect(() => {
                 // show link 'login' when unauthorised
               <li className="nav-item">
                         {/* login Link */}
-            <Link onClick={()=> setActiveTab('/login')} 
+            <Link  
               className={`nav-link nav-link-css border-0 rounded-4 p-2 ${
                 activeTab === '/login' ? 'link-active' : ''
               }`} to= '/login'>
@@ -81,7 +91,7 @@ useEffect(() => {
                 <UserCircle2 className='nav-icon nav-icon-login me-2'/>
                 
                 {/* Link's label */}
-                 <span className = 'nav-login-label'>
+                 <span className = 'nav-login-label fw-bold'>
                   Login
                 </span>
                  </Link>

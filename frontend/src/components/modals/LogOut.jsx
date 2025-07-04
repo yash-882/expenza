@@ -1,4 +1,4 @@
-import React, {useContext, useState} from 'react'
+import React, {useContext, useEffect, useState} from 'react'
 import PopupWrapper from '../PopupWrapper'
 import {UserContext} from '../../contexts/UserContext'
 import axios from 'axios'
@@ -7,7 +7,7 @@ import NotificationPopup from './NotificationPopup'
 function LogOut({closePopup}) {
     let [loading, setLoading] = useState(false)
 
-      let {setIsAuthenticated} = useContext(UserContext)
+      let {isAuthenticated, setIsAuthenticated} = useContext(UserContext)
              // state for displaying popups
       let [notificationPopup, showNotificationPopup] = useState(false)
             

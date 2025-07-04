@@ -1,9 +1,7 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { categoriesByType } from '../constants/transactions/transaction-categories'
 import { ShoppingBagIcon, BookText } from 'lucide-react'
 import axios from 'axios'
-import { useNavigate } from 'react-router-dom';
-import { UserContext } from '../contexts/UserContext';
 import NotificationPopup from '../components/modals/NotificationPopup';
 
 
@@ -35,10 +33,6 @@ function AddTransaction() {
           // show notification popup
           showNotificationPopup(true)
         }
-
-    // user's authentication status
-    const {isAuthenticated, setIsAuthenticated} = useContext(UserContext)
-    const navigate = useNavigate()
 
     async function addTransaction(evt){
         evt.preventDefault()
@@ -121,13 +115,6 @@ function AddTransaction() {
             
 
     }, [type])
-
-         useEffect(() => {
-              // redirect to '/login' if not authenticated
-              if(!isAuthenticated)
-                navigate('/login')
-    
-        }, [isAuthenticated])
 
 
     return (

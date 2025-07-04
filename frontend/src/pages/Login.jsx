@@ -57,7 +57,7 @@ function Login() {
             // remove loading
         setLoading(false) 
 
-            setErrMessage(err.response.data?.message || 'Server error, please try again later')
+            setErrMessage(err.response?.data?.message || 'Server error, please try again later')
             
         }
     }

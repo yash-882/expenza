@@ -1,8 +1,6 @@
-import React, {useState, useContext} from 'react'
+import React, {useState} from 'react'
 import AccountSettings from '../constants/settings/settings'
 import { SettingsIcon } from 'lucide-react'
-import { UserContext } from '../contexts/UserContext';
-import {useNavigate} from 'react-router-dom'
 import ProfileView from '../components/modals/ProfileView'
 import ProfileUpdate from '../components/modals/ProfileUpdate';
 import TransactionOverview from '../components/modals/TransactionOverview'
@@ -14,15 +12,6 @@ import DeleteAccount from '../components/modals/DeleteAccount';
 import LogOut from '../components/modals/LogOut'
 
 function Settings() {
-  
-    let navigate = useNavigate()
-    // user authentication status
-    let {isAuthenticated} = useContext(UserContext)
-
-    // redirect to /login page if not authenticated
-    if(!isAuthenticated){
-      navigate('/login')
-    }
 
  // state for select individual setting
   const [setting, setSetting] = useState({path: '', isActive: false});
